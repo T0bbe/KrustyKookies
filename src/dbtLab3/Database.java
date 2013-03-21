@@ -132,6 +132,4 @@ public class Database {
 		}
 	
 
-	/* --- insert own code here --- */
-
 }
