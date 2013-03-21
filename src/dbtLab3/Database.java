@@ -131,5 +131,20 @@ public class Database {
 		}
 		}
 	
+	public Integer getPallet(int palletNbr) {
+		String sql = "select * from Pallets where palletNbr = ?";
+		int temp = 0;
+		try {
+			PreparedStatement ps = conn.prepareStatement(sql);
+			ps.setInt(1, palletNbr);
+			ResultSet rs = ps.executeQuery();
+			temp = rs.getInt("PalletNbr");
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return temp;
+	}
+	
 
 }

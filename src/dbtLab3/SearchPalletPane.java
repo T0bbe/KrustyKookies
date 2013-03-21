@@ -1,6 +1,7 @@
 package dbtLab3;
 
 import java.awt.GridLayout;
+import java.util.ArrayList;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
@@ -38,7 +39,7 @@ private static final long serialVersionUID = 1;
 		clearMessage();
 	}
 	
-	public JComponent createLeftPanel() {
+	public JComponent createTopPanel() {
 		inputField = new JTextField();
 		search = new JButton("search");
 		
@@ -57,4 +58,33 @@ private static final long serialVersionUID = 1;
 		p.add(search);
 		return p;
 	}
+	
+	public JComponent createMiddlePanel() {
+		batchNrListModel = new DefaultListModel();
+		batches = new JList(batchNrListModel);
+		batches.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+	
+
+		
+	/*	cookieNameListModel = new DefaultListModel();
+		cookieNames = new JList(cookieNameListModel);
+		
+		cookieNames.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		cookieNames.setPrototypeCellValue("123456789012");
+		cookieNames.addListSelectionListener(new CookieNameSelectionListener());
+
+		JScrollPane p1 = new JScrollPane(cookieNames);*/
+		
+		JPanel p = new JPanel();
+		p.setLayout(new GridLayout(1, 2));
+		p.add(inputField);
+		p.add(search);
+		return p;
+	}
+
+private void fetchPalletNr(int input) {
+	batchNrListModel.removeAllElements();
+    ArrayList<String> batchNbrs = new ArrayList<String>();
+    batchNbrs.add("#" + (db.getPallet(input)).toString());
+    }
 }
