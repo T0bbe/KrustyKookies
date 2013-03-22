@@ -146,5 +146,43 @@ public class Database {
 		return temp;
 	}
 	
+	public ArrayList<String> getBatch(String date) {
+		String sql = "select * from Pallets where date = ?";
+		ArrayList<String> temp = new ArrayList<String>();
+		try {
+			PreparedStatement ps = conn.prepareStatement(sql);
+			ps.setString(1, date);
+			ResultSet rs = ps.executeQuery();
+			temp.add(((Integer) rs.getInt("PalletNbr")).toString());
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return temp;
+	}
+	
+	public ArrayList<String> showPallet(Integer palletNbr){
+		String sql = "select * from Pallets where palletNbr = ?";
+		ArrayList<String> temp = new ArrayList<String>();
+		try {
+			PreparedStatement ps = conn.prepareStatement(sql);
+			ps.setInt(1, palletNbr);
+			ResultSet rs = ps.executeQuery();
+			temp.add(palletNbr.toString());
+			temp.add(rs.getString("cookieName"));
+			temp.add(rs.getString("dateOfProduction"));
+			temp.add(rs.getString("currentLocation"));
+			if(rs.getBoolean("isBlocked")){
+			temp.add("Yes");
+			} else {
+				temp.add("No");
+			}
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return temp;
+	}
+	
 
 }

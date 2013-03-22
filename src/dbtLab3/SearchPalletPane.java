@@ -1,6 +1,8 @@
 package dbtLab3;
 
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 
 import javax.swing.DefaultListModel;
@@ -30,8 +32,11 @@ private static final long serialVersionUID = 1;
 	
 	private JButton search;
 	
+	private ActionHandler actHand;
+	
 	public SearchPalletPane(Database db) {
 		super(db);
+		actHand = new ActionHandler();
 		// TODO Auto-generated constructor stub
 	}
 	
@@ -42,6 +47,8 @@ private static final long serialVersionUID = 1;
 	public JComponent createTopPanel() {
 		inputField = new JTextField();
 		search = new JButton("search");
+		search.addActionListener(new ActionHandler());
+		
 		
 	/*	cookieNameListModel = new DefaultListModel();
 		cookieNames = new JList(cookieNameListModel);
@@ -84,7 +91,28 @@ private static final long serialVersionUID = 1;
 
 private void fetchPalletNr(int input) {
 	batchNrListModel.removeAllElements();
-    ArrayList<String> batchNbrs = new ArrayList<String>();
-    batchNbrs.add("#" + (db.getPallet(input)).toString());
+    batchNrListModel.addElement(db.getPallet(input));
+    db.showPallet(input);
     }
+
+
+private void fetchBatch(String input) {
+	batchNrListModel.removeAllElements();
+    ArrayList<String> batchNbrs = db.getBatch(input);
+    for(int i = 0; i < batchNbrs.size(); i++){
+    batchNrListModel.addElement(batchNbrs.get(i));
+    }
+}
+class ActionHandler implements ActionListener {
+	
+	public void actionPerformed(ActionEvent e) {
+		if (batches.isSelectionEmpty()) {
+			return;
+		}
+		
+		Integer batchNbr = (Integer) batches.getSelectedValue();
+		db.showPallet(batchNbr);
+		
+	}
+}
 }
