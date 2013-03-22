@@ -32,11 +32,13 @@ private static final long serialVersionUID = 1;
 	
 	private JButton search;
 	
-	private ActionHandler actHand;
+	private ButtonActionHandler bActHand;
+	
+	private ListActionHandler lActHand;
 	
 	public SearchPalletPane(Database db) {
 		super(db);
-		actHand = new ActionHandler();
+		bActHand = new ButtonActionHandler();
 		// TODO Auto-generated constructor stub
 	}
 	
@@ -44,48 +46,35 @@ private static final long serialVersionUID = 1;
 		clearMessage();
 	}
 	
-	public JComponent createTopPanel() {
+	public JComponent createLeftPanel() {
 		inputField = new JTextField();
 		search = new JButton("search");
-		search.addActionListener(new ActionHandler());
+		search.addActionListener(new ButtonActionHandler());
+		batchNrListModel = new DefaultListModel();
 		
+		batchNrListModel.addElement("1");
+		batchNrListModel.addElement("2");
+		batchNrListModel.addElement("3");
+		batchNrListModel.addElement("4");
 		
-	/*	cookieNameListModel = new DefaultListModel();
-		cookieNames = new JList(cookieNameListModel);
-		
-		cookieNames.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		cookieNames.setPrototypeCellValue("123456789012");
-		cookieNames.addListSelectionListener(new CookieNameSelectionListener());
-
-		JScrollPane p1 = new JScrollPane(cookieNames);*/
-		
+		batches = new JList(batchNrListModel);
+		batches.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		JPanel p = new JPanel();
-		p.setLayout(new GridLayout(1, 2));
+		p.setLayout(new GridLayout(2, 2));
 		p.add(inputField);
 		p.add(search);
+		p.add(batches);
 		return p;
 	}
 	
 	public JComponent createMiddlePanel() {
-		batchNrListModel = new DefaultListModel();
-		batches = new JList(batchNrListModel);
-		batches.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-	
-
-		
-	/*	cookieNameListModel = new DefaultListModel();
-		cookieNames = new JList(cookieNameListModel);
-		
-		cookieNames.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		cookieNames.setPrototypeCellValue("123456789012");
-		cookieNames.addListSelectionListener(new CookieNameSelectionListener());
-
-		JScrollPane p1 = new JScrollPane(cookieNames);*/
-		
 		JPanel p = new JPanel();
-		p.setLayout(new GridLayout(1, 2));
-		p.add(inputField);
-		p.add(search);
+		fields = new JTextField[4];
+		p.setLayout(new GridLayout(4, 1));
+		for(int i = 0; i < 4; i++){
+			fields[i] = new JTextField("AAAAAAAAAAAAAAAAAAAAAAA");
+			p.add(fields[i]);
+		}
 		return p;
 	}
 
@@ -103,16 +92,33 @@ private void fetchBatch(String input) {
     batchNrListModel.addElement(batchNbrs.get(i));
     }
 }
-class ActionHandler implements ActionListener {
+
+private void fetchInformation(int input) {
+	batchNrListModel.removeAllElements();
+    ArrayList<String> batchNbrs = db.showPallet(input);
+    for(int i = 0; i < batchNbrs.size(); i++){
+    batchNrListModel.addElement(batchNbrs.get(i));
+    }
+}
+class ButtonActionHandler implements ActionListener {
 	
 	public void actionPerformed(ActionEvent e) {
-		if (batches.isSelectionEmpty()) {
-			return;
+		try{ fetchBatch(inputField.getText());
+		} catch (NullPointerException e2){
+			messageLabel.setText("No data entered");
 		}
 		
-		Integer batchNbr = (Integer) batches.getSelectedValue();
-		db.showPallet(batchNbr);
 		
 	}
+}
+
+class ListActionHandler implements ActionListener {
+	
+	public void actionPerformed(ActionEvent e) {
+		try{ fetchBatch(inputField.getText());
+		} catch (NullPointerException e2){
+			messageLabel.setText("No data entered");
+		}
+}
 }
 }
