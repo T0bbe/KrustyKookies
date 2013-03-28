@@ -14,7 +14,7 @@ import java.awt.*;
  * The class contains a reference to the database object, so subclasses
  * can communicate with the database.
  */
-public class BasicPane extends JPanel {
+public class BasicPane extends JPanel implements Pane {
 	private static final long serialVersionUID = 1;
     /**
      * The database object.

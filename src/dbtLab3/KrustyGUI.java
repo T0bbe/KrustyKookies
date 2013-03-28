@@ -71,7 +71,7 @@ public class KrustyGUI {
 		 *            The change event (not used).
 		 */
 		public void stateChanged(ChangeEvent e) {
-			BasicPane selectedPane = (BasicPane) tabbedPane
+			Pane selectedPane = (Pane) tabbedPane
 					.getSelectedComponent();
 			selectedPane.entryActions();
 		}
