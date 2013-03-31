@@ -12,18 +12,25 @@ import java.util.ArrayList;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.SpringLayout;
 import javax.swing.border.BevelBorder;
+import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.border.SoftBevelBorder;
+import javax.swing.border.TitledBorder;
 
 import dbtLab3.ProductionPane.ActionHandler;
 import dbtLab3.ProductionPane.CookieNameSelectionListener;
@@ -58,6 +65,8 @@ public class SearchPalletPane extends JPanel implements Pane{
 	
 	private JButton search;
 	
+	private JButton block;
+	
 	private ButtonActionHandler bActHand;
 	
 	private ListActionHandler lActHand;
@@ -74,97 +83,111 @@ public class SearchPalletPane extends JPanel implements Pane{
 	        JPanel rightPanel = new JPanel();
 	        rightPanel.setLayout(new BorderLayout());
 	                
-	        JComponent topPanel = createTopPanel();
+	        /*JComponent topPanel = createTopPanel();*/
 	        JComponent middlePanel = createMiddlePanel();
 	        JComponent bottomPanel = createBottomPanel();
+	        JComponent resultPanel = createRightPanel();
 	        bottomPanel.setBorder
 	            (new CompoundBorder(new SoftBevelBorder(BevelBorder.RAISED),
 	                                bottomPanel.getBorder()));
-	        add(topPanel, BorderLayout.NORTH);
-	        rightPanel.add(middlePanel, BorderLayout.CENTER);
+	        /*add(topPanel, BorderLayout.NORTH);*/
+	        add(middlePanel, BorderLayout.CENTER);
+	        rightPanel.add(resultPanel, BorderLayout.CENTER);
 	        rightPanel.add(bottomPanel, BorderLayout.SOUTH);
-	        add(rightPanel, BorderLayout.CENTER);
-		add(createRightPanel(), BorderLayout.EAST);
+	        add(rightPanel, BorderLayout.EAST);
 		bActHand = new ButtonActionHandler();
 	}
 	
 	public JComponent createLeftPanel() {
 		inputField = new JTextField(13);
+		Font newTextFieldFont = new Font(inputField.getFont().getName(),Font.BOLD,inputField.getFont().getSize());
+		Font newTextFieldFont2 = new Font(inputField.getFont().getName(),Font.PLAIN,inputField.getFont().getSize());
 		search = new JButton("Perform Search");
 		JTextField inputField2 = new JTextField();
+		JMenuBar inputField3 = new JMenuBar();
+		JMenu menu1 = new JMenu("Select Cookie Name");
+		menu1.setFont(newTextFieldFont2);
+		menu1.add(new JCheckBoxMenuItem("All"));
+		menu1.add(new JCheckBoxMenuItem("Kaka1"));
+		menu1.add(new JCheckBoxMenuItem("Kaka2"));
+		menu1.add(new JCheckBoxMenuItem("Kaka3"));
+		menu1.add(new JCheckBoxMenuItem("Kaka4"));
+		menu1.add(new JCheckBoxMenuItem("Kaka5"));
+		menu1.add(new JCheckBoxMenuItem("Kaka6"));
+		menu1.add(new JCheckBoxMenuItem("Kaka7"));
+		inputField3.add(menu1);
+		JTextField inputField4 = new JTextField();
 		JButton search2 = new JButton("Perform Search");
 		search.addActionListener(new ButtonActionHandler());
-		batchNrListModel = new DefaultListModel();
-		
-		batchNrListModel.addElement("1");
-		batchNrListModel.addElement("2");
-		batchNrListModel.addElement("3");
-		batchNrListModel.addElement("4");
-		
-		batches = new JList(batchNrListModel);
-		batches.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		JPanel p = new JPanel();
-		p.setLayout(new GridLayout(10, 1));
-		p.add(new JPanel());
-		JTextField temp = new JTextField("Search by Pallet Number");
-		temp.setBorder(null);
-		temp.setEditable(false);
+		p.setLayout(new GridLayout(11, 1));
+		Border border = new LineBorder(Color.black);
+		TitledBorder t = new TitledBorder(border, "Search");
+		t.setTitleColor(Color.black);
+		KrustyTextField temp = new KrustyTextField("Search by BatchNbr");
+		temp.setFont(newTextFieldFont);
+		p.setBorder(t);
 		p.add(temp);
 		p.add(inputField);
 		p.add(search);
 		p.add(new JPanel());
-		JTextField temp2 = new JTextField("Search by Production Date");
-		temp2.setBorder(null);
-		temp2.setEditable(false);
+		KrustyTextField temp2 = new KrustyTextField("Search by Date or Name");
+		temp2.setFont(newTextFieldFont);
+		KrustyTextField temp4 = new KrustyTextField("Start Date (Optional)");
+		KrustyTextField temp5 = new KrustyTextField("End Date (Optional)");
 		p.add(temp2);
+		p.add(inputField3);
+		p.add(temp4);
 		p.add(inputField2);
+		p.add(temp5);
+		p.add(inputField4);
 		p.add(search2);
-		p.setBorder(new LineBorder(Color.black));
+		
 		return p;
 	}
 	
-	public JComponent createTopPanel() {
-		JPanel p = new JPanel();
-		p.setLayout(new GridLayout(1,3));
-		JTextField temp = new JTextField("Search");
-		temp.setBorder(null);
-		temp.setEditable(false);
-		Font newTextFieldFont = new Font(temp.getFont().getName(),Font.BOLD,temp.getFont().getSize());
-		temp.setFont(newTextFieldFont);
-		p.add(temp);
-		JTextField temp2 = new JTextField("Batch Numbers");
-		temp2.setBorder(null);
-		temp2.setEditable(false);
-		temp2.setFont(newTextFieldFont);
-		p.add(temp2);
-		JTextField temp3 = new JTextField("Information");
-		temp3.setBorder(null);
-		temp3.setEditable(false);
-		temp3.setFont(newTextFieldFont);
-		p.add(temp3);
-		return p;
-	}
 	
 	public JComponent createMiddlePanel() {
+		batchNrListModel = new DefaultListModel();
+		batchNrListModel.addElement("1");
+		batchNrListModel.addElement("2");
+		batchNrListModel.addElement("3");
+		batchNrListModel.addElement("4");
+		batches = new JList(batchNrListModel);
+		batches.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		JPanel p = new JPanel();
-		p.setBorder(new LineBorder(Color.black));
-		p.add(batches);
+		Border border = new LineBorder(Color.black);
+		TitledBorder t = new TitledBorder(border, "Batch Numbers");
+		p.setBorder(t)
+;		p.add(batches);
 		return p;
 	}
 	
 	public JComponent createBottomPanel() {
-		JButton block = new JButton("Block Batch");
+		block = new JButton("Block Batch");
+		block.setBackground(Color.PINK);
 		return block;
 	}
 	
 	public JComponent createRightPanel() {
 		JPanel p = new JPanel();
-		fields = new JTextField[4];
-		p.setLayout(new GridLayout(4, 1));
-		for(int i = 0; i < 4; i++){
-			fields[i] = new JTextField("AAAAAAAAAAAAAAAAAAAAAAA");
+		Border border = new LineBorder(Color.black);
+		TitledBorder t = new TitledBorder(border, "Information");
+		p.setBorder(t);
+		fields = new JTextField[8];
+		fields[0] = new KrustyTextField("Batch Number");
+		fields[2] = new KrustyTextField("Cookie Name");
+		fields[4] = new KrustyTextField("Production Date");
+		fields[6] = new KrustyTextField("Quality Index");
+		p.setLayout(new GridLayout(8, 1));
+		for(int i = 1; i < 8; i = i+2){
+			fields[i] = new JTextField("                                         ");
+			fields[i].setEditable(false);
+		}
+		for(int i = 0; i < 8; i++){
 			p.add(fields[i]);
 		}
+		
 		return p;
 	}
 
@@ -184,11 +207,18 @@ private void fetchBatch(String input) {
 }
 
 private void fetchInformation(int input) {
-	batchNrListModel.removeAllElements();
+	for(int i = 1; i < 8; i = i+2){
+		fields[i].setText("");
+	}
     ArrayList<String> batchNbrs = db.showPallet(input);
-    for(int i = 0; i < batchNbrs.size(); i++){
-    batchNrListModel.addElement(batchNbrs.get(i));
+    for(int i = 1; i < 8; i = i+2){
+    fields[i].setText((batchNbrs.get((i-1)/2)));
     }
+    if(batchNbrs.get(4).equals("1")){
+    	/*block.setBlocked();*/
+    }
+    
+    
 }
 class ButtonActionHandler implements ActionListener {
 	
