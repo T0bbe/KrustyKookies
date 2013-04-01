@@ -20,11 +20,8 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
-import javax.swing.JScrollBar;
-import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
-import javax.swing.SpringLayout;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
@@ -67,6 +64,8 @@ public class SearchPalletPane extends JPanel implements Pane{
 	
 	private JButton block;
 	
+	private JButton select;
+	
 	private ButtonActionHandler bActHand;
 	
 	private ListActionHandler lActHand;
@@ -81,19 +80,25 @@ public class SearchPalletPane extends JPanel implements Pane{
 	        add(leftPanel, BorderLayout.WEST);
 	                
 	        JPanel rightPanel = new JPanel();
+	        JPanel centerPanel = new JPanel();
+	        centerPanel.setLayout(new BorderLayout());
 	        rightPanel.setLayout(new BorderLayout());
-	                
-	        /*JComponent topPanel = createTopPanel();*/
+	        
 	        JComponent middlePanel = createMiddlePanel();
-	        JComponent bottomPanel = createBottomPanel();
+	        JComponent rightBottomPanel = createRightBottomPanel();
+	        JComponent leftBottomPanel = createLeftBottomPanel();
 	        JComponent resultPanel = createRightPanel();
-	        bottomPanel.setBorder
+	        rightBottomPanel.setBorder
 	            (new CompoundBorder(new SoftBevelBorder(BevelBorder.RAISED),
-	                                bottomPanel.getBorder()));
-	        /*add(topPanel, BorderLayout.NORTH);*/
-	        add(middlePanel, BorderLayout.CENTER);
+	                                rightBottomPanel.getBorder()));
+	        leftBottomPanel.setBorder
+            (new CompoundBorder(new SoftBevelBorder(BevelBorder.RAISED),
+                                leftBottomPanel.getBorder()));
+	        centerPanel.add(middlePanel, BorderLayout.NORTH);
+	        centerPanel.add(leftBottomPanel, BorderLayout.SOUTH);
+	        add(centerPanel, BorderLayout.CENTER);
 	        rightPanel.add(resultPanel, BorderLayout.CENTER);
-	        rightPanel.add(bottomPanel, BorderLayout.SOUTH);
+	        rightPanel.add(rightBottomPanel, BorderLayout.SOUTH);
 	        add(rightPanel, BorderLayout.EAST);
 		bActHand = new ButtonActionHandler();
 	}
@@ -120,7 +125,7 @@ public class SearchPalletPane extends JPanel implements Pane{
 		JButton search2 = new JButton("Perform Search");
 		search.addActionListener(new ButtonActionHandler());
 		JPanel p = new JPanel();
-		p.setLayout(new GridLayout(11, 1));
+		p.setLayout(new GridLayout(12, 1));
 		Border border = new LineBorder(Color.black);
 		TitledBorder t = new TitledBorder(border, "Search");
 		t.setTitleColor(Color.black);
@@ -142,7 +147,7 @@ public class SearchPalletPane extends JPanel implements Pane{
 		p.add(temp5);
 		p.add(inputField4);
 		p.add(search2);
-		
+		p.add(new JPanel());
 		return p;
 	}
 	
@@ -163,9 +168,13 @@ public class SearchPalletPane extends JPanel implements Pane{
 		return p;
 	}
 	
-	public JComponent createBottomPanel() {
+	public JComponent createLeftBottomPanel() {
+		select = new JButton("Select Batch");
+		return select;
+	}
+	
+	public JComponent createRightBottomPanel() {
 		block = new JButton("Block Batch");
-		block.setBackground(Color.PINK);
 		return block;
 	}
 	
