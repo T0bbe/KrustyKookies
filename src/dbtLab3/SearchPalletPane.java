@@ -10,6 +10,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 
+import javax.swing.ButtonGroup;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
@@ -20,6 +21,9 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JRadioButtonMenuItem;
+import javax.swing.JScrollBar;
+import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.border.BevelBorder;
@@ -42,29 +46,33 @@ public class SearchPalletPane extends JPanel implements Pane{
     /**
      * A label which is intended to contain a message text.
      */
-    protected JLabel messageLabel;
-        
-    /** 
-     * Create a BasicPane object.
-     *
-     * @param db The database object.
-     */
+    protected JLabel errorField;
 	
 	private DefaultListModel batchNrListModel;
 	
+	
+	// 1 för BatchNr, 3 för Kaknamn, 5 för Produktionsdatum och 7 för QualIndex.
 	private JTextField[] fields;
 	
-	private JTextField inputField;
+	private JTextField batchNrField;
 	
 	private JList batches;
 	
-	private JPanel numberOfBags;
+	// Sökknapp för batch
+	private JButton searchButton1;
 	
-	private JButton search;
+	// Sökknapp för datum + kaknamn
+	private JButton searchButton2;
 	
+	// Knapp för att blockera/avblockera batch
 	private JButton block;
 	
+	// Knapp för att välja batch att visas
 	private JButton select;
+	
+	private JRadioButtonMenuItem all;
+	
+	private JRadioButtonMenuItem[] cookieButtons;
 	
 	private ButtonActionHandler bActHand;
 	
@@ -72,8 +80,11 @@ public class SearchPalletPane extends JPanel implements Pane{
 	
 	public SearchPalletPane(Database db) {
 	        this.db = db;
-	        messageLabel = new JLabel("      ");
-	                
+	        errorField = new JLabel("                                                 ");
+	        Border border = new LineBorder(Color.black);
+			TitledBorder t = new TitledBorder(border, "Error Message");
+			errorField.setBorder(t);
+	        
 	        setLayout(new BorderLayout());
 	        
 	        JComponent leftPanel = createLeftPanel();
@@ -100,53 +111,58 @@ public class SearchPalletPane extends JPanel implements Pane{
 	        rightPanel.add(resultPanel, BorderLayout.CENTER);
 	        rightPanel.add(rightBottomPanel, BorderLayout.SOUTH);
 	        add(rightPanel, BorderLayout.EAST);
+	        add(errorField, BorderLayout.SOUTH);
 		bActHand = new ButtonActionHandler();
 	}
 	
 	public JComponent createLeftPanel() {
-		inputField = new JTextField(13);
-		Font newTextFieldFont = new Font(inputField.getFont().getName(),Font.BOLD,inputField.getFont().getSize());
-		Font newTextFieldFont2 = new Font(inputField.getFont().getName(),Font.PLAIN,inputField.getFont().getSize());
-		search = new JButton("Perform Search");
-		JTextField inputField2 = new JTextField();
-		JMenuBar inputField3 = new JMenuBar();
-		JMenu menu1 = new JMenu("Select Cookie Name");
-		menu1.setFont(newTextFieldFont2);
-		menu1.add(new JCheckBoxMenuItem("All"));
-		menu1.add(new JCheckBoxMenuItem("Kaka1"));
-		menu1.add(new JCheckBoxMenuItem("Kaka2"));
-		menu1.add(new JCheckBoxMenuItem("Kaka3"));
-		menu1.add(new JCheckBoxMenuItem("Kaka4"));
-		menu1.add(new JCheckBoxMenuItem("Kaka5"));
-		menu1.add(new JCheckBoxMenuItem("Kaka6"));
-		menu1.add(new JCheckBoxMenuItem("Kaka7"));
-		inputField3.add(menu1);
-		JTextField inputField4 = new JTextField();
-		JButton search2 = new JButton("Perform Search");
-		search.addActionListener(new ButtonActionHandler());
+		batchNrField = new JTextField(13);
+		JTextField startDateField = new JTextField();
+		JTextField endDateField = new JTextField();
+		
+		JMenu menu = new JMenu("Select Cookie Name");
+		Font newTextFieldFont = new Font(batchNrField.getFont().getName(),Font.BOLD,batchNrField.getFont().getSize());
+		Font newTextFieldFont2 = new Font(batchNrField.getFont().getName(),Font.PLAIN,batchNrField.getFont().getSize());
+		searchButton1 = new JButton("Perform Search");
+		
+		JMenuBar menuField = new JMenuBar();
+		
+		menu.setFont(newTextFieldFont2);
+		all = new JRadioButtonMenuItem("All");
+		all.setSelected(true);
+		menu.add(all);
+		cookieButtons = new JRadioButtonMenuItem[8];
+		cookieButtons[0] = all;
+		for(int i=1; i < 8; i++){
+			cookieButtons[i] = new JRadioButtonMenuItem("Kaka" + i);
+			menu.add(cookieButtons[i]);
+		}
+		groupButtons(cookieButtons);
+		menuField.add(menu);
+		
+		searchButton2 = new JButton("Perform Search");
+		searchButton1.addActionListener(new ButtonActionHandler());
 		JPanel p = new JPanel();
 		p.setLayout(new GridLayout(12, 1));
 		Border border = new LineBorder(Color.black);
 		TitledBorder t = new TitledBorder(border, "Search");
 		t.setTitleColor(Color.black);
-		KrustyTextField temp = new KrustyTextField("Search by BatchNbr");
-		temp.setFont(newTextFieldFont);
+		KrustyTextField searchInfo1 = new KrustyTextField("Search by BatchNbr");
+		searchInfo1.setFont(newTextFieldFont);
+		KrustyTextField searchInfo2 = new KrustyTextField("Search by Date or Name");
+		searchInfo2.setFont(newTextFieldFont);
 		p.setBorder(t);
-		p.add(temp);
-		p.add(inputField);
-		p.add(search);
+		p.add(searchInfo1);
+		p.add(batchNrField);
+		p.add(searchButton1);
 		p.add(new JPanel());
-		KrustyTextField temp2 = new KrustyTextField("Search by Date or Name");
-		temp2.setFont(newTextFieldFont);
-		KrustyTextField temp4 = new KrustyTextField("Start Date (Optional)");
-		KrustyTextField temp5 = new KrustyTextField("End Date (Optional)");
-		p.add(temp2);
-		p.add(inputField3);
-		p.add(temp4);
-		p.add(inputField2);
-		p.add(temp5);
-		p.add(inputField4);
-		p.add(search2);
+		p.add(searchInfo2);
+		p.add(menuField);
+		p.add(new KrustyTextField("Start Date (Optional)"));
+		p.add(startDateField);
+		p.add(new KrustyTextField("End Date (Optional)"));
+		p.add(endDateField);
+		p.add(searchButton2);
 		p.add(new JPanel());
 		return p;
 	}
@@ -154,17 +170,27 @@ public class SearchPalletPane extends JPanel implements Pane{
 	
 	public JComponent createMiddlePanel() {
 		batchNrListModel = new DefaultListModel();
-		batchNrListModel.addElement("1");
-		batchNrListModel.addElement("2");
-		batchNrListModel.addElement("3");
-		batchNrListModel.addElement("4");
+		batchNrListModel.addElement("  1  ");
+		batchNrListModel.addElement("  2  ");
+		batchNrListModel.addElement("  3  ");
+		batchNrListModel.addElement("  4  ");
+		batchNrListModel.addElement("  5  ");
+		batchNrListModel.addElement("  6  ");
+		batchNrListModel.addElement("  7  ");
+		batchNrListModel.addElement("  8  ");
+		batchNrListModel.addElement("  9  ");
+		batchNrListModel.addElement("  10  ");
+		batchNrListModel.addElement("  11  ");
+		batchNrListModel.addElement("  12  ");
 		batches = new JList(batchNrListModel);
 		batches.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		JPanel p = new JPanel();
+		JScrollPane scroll = new JScrollPane(batches);
+		scroll.setVerticalScrollBar(new JScrollBar());
 		Border border = new LineBorder(Color.black);
 		TitledBorder t = new TitledBorder(border, "Batch Numbers");
-		p.setBorder(t)
-;		p.add(batches);
+		p.setBorder(t);
+		p.add(scroll);
 		return p;
 	}
 	
@@ -232,9 +258,9 @@ private void fetchInformation(int input) {
 class ButtonActionHandler implements ActionListener {
 	
 	public void actionPerformed(ActionEvent e) {
-		try{ fetchBatch(inputField.getText());
+		try{ fetchBatch(batchNrField.getText());
 		} catch (NullPointerException e2){
-			messageLabel.setText("No data entered");
+			errorField.setText("No data entered");
 		}
 		
 		
@@ -244,9 +270,9 @@ class ButtonActionHandler implements ActionListener {
 class ListActionHandler implements ActionListener {
 	
 	public void actionPerformed(ActionEvent e) {
-		try{ fetchBatch(inputField.getText());
+		try{ fetchBatch(batchNrField.getText());
 		} catch (NullPointerException e2){
-			messageLabel.setText("No data entered");
+			errorField.setText("No data entered");
 		}
 }
 }
@@ -255,5 +281,12 @@ class ListActionHandler implements ActionListener {
 public void entryActions() {
 	// TODO Auto-generated method stub
 	
+}
+
+public void groupButtons(JRadioButtonMenuItem[] buttons) {
+ButtonGroup buttonGroup = new ButtonGroup();
+for(int i = 0; i < buttons.length; i++){
+	buttonGroup.add(buttons[i]);
+}
 }
 }
