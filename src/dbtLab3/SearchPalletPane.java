@@ -74,7 +74,11 @@ public class SearchPalletPane extends JPanel implements Pane{
 	
 	private JRadioButtonMenuItem[] cookieButtons;
 	
-	private ButtonActionHandler bActHand;
+	private BlockButtonActionHandler blockActHand;
+	
+	private DateSearchButtonActionHandler dateActHand;
+	
+	private BatchSearchButtonActionHandler batchActHand;
 	
 	private ListActionHandler lActHand;
 	
@@ -112,7 +116,7 @@ public class SearchPalletPane extends JPanel implements Pane{
 	        rightPanel.add(rightBottomPanel, BorderLayout.SOUTH);
 	        add(rightPanel, BorderLayout.EAST);
 	        add(errorField, BorderLayout.SOUTH);
-		bActHand = new ButtonActionHandler();
+		blockActHand = new BlockButtonActionHandler();
 	}
 	
 	public JComponent createLeftPanel() {
@@ -124,9 +128,10 @@ public class SearchPalletPane extends JPanel implements Pane{
 		Font newTextFieldFont = new Font(batchNrField.getFont().getName(),Font.BOLD,batchNrField.getFont().getSize());
 		Font newTextFieldFont2 = new Font(batchNrField.getFont().getName(),Font.PLAIN,batchNrField.getFont().getSize());
 		searchButton1 = new JButton("Perform Search");
-		
+		searchButton1.addActionListener(batchActHand);
+		searchButton2 = new JButton("Perform Search");
+		searchButton2.addActionListener(dateActHand);
 		JMenuBar menuField = new JMenuBar();
-		
 		menu.setFont(newTextFieldFont2);
 		all = new JRadioButtonMenuItem("All");
 		all.setSelected(true);
@@ -140,8 +145,8 @@ public class SearchPalletPane extends JPanel implements Pane{
 		groupButtons(cookieButtons);
 		menuField.add(menu);
 		
-		searchButton2 = new JButton("Perform Search");
-		searchButton1.addActionListener(new ButtonActionHandler());
+		
+		searchButton1.addActionListener(new BlockButtonActionHandler());
 		JPanel p = new JPanel();
 		p.setLayout(new GridLayout(12, 1));
 		Border border = new LineBorder(Color.black);
@@ -196,11 +201,13 @@ public class SearchPalletPane extends JPanel implements Pane{
 	
 	public JComponent createLeftBottomPanel() {
 		select = new JButton("Select Batch");
+		select.addActionListener(lActHand);
 		return select;
 	}
 	
 	public JComponent createRightBottomPanel() {
 		block = new JButton("Block Batch");
+		block.addActionListener(blockActHand);
 		return block;
 	}
 	
@@ -255,18 +262,30 @@ private void fetchInformation(int input) {
     
     
 }
-class ButtonActionHandler implements ActionListener {
+class BlockButtonActionHandler implements ActionListener {
 	
 	public void actionPerformed(ActionEvent e) {
 		try{ fetchBatch(batchNrField.getText());
 		} catch (NullPointerException e2){
 			errorField.setText("No data entered");
-		}
-		
-		
+		}	
 	}
 }
 
+class BatchSearchButtonActionHandler implements ActionListener {
+	
+	public void actionPerformed(ActionEvent e) {
+
+}
+}
+
+class DateSearchButtonActionHandler implements ActionListener {
+			
+			public void actionPerformed(ActionEvent e) {
+				}
+			}
+			
+		
 class ListActionHandler implements ActionListener {
 	
 	public void actionPerformed(ActionEvent e) {
@@ -276,6 +295,7 @@ class ListActionHandler implements ActionListener {
 		}
 }
 }
+
 
 @Override
 public void entryActions() {
