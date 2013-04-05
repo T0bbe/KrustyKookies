@@ -24,6 +24,7 @@ public class Database {
 	 */
 	public Database() {
 		conn = null;
+		openConnection("db05", "dicksteele");
 	}
 
 	/**
@@ -42,7 +43,7 @@ public class Database {
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
 			conn = DriverManager.getConnection(
-					"jdbc:mysql://puccini.cs.lth.se/" + userName, userName,
+					"jdbc:mysql://localhost/" + userName, userName,
 					password);
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -131,17 +132,18 @@ public class Database {
 		}
 		}
 	
-	public Integer getPallet(String palletNbr) {
-		String sql = "select * from Pallets where palletNbr = ?";
+	public Integer getPallet(String palletNbr) throws Exception {
+		String sql = "select * from Pallet where palletNbr = ?";
 		int temp = 0;
 		try {
 			PreparedStatement ps = conn.prepareStatement(sql);
 			ps.setInt(1, Integer.valueOf(palletNbr));
 			ResultSet rs = ps.executeQuery();
-			temp = rs.getInt("PalletNbr");
+			rs.next();
+			temp = rs.getInt("palletNbr");
 			
 		} catch (SQLException e) {
-			e.printStackTrace();
+			throw new Exception("No such PalletNbr");
 		}
 		return temp;
 	}
@@ -151,21 +153,21 @@ public class Database {
 		String sql;
 		try {
 		if(input[1] == null && input[2] == null){
-			sql = "select * from Pallets where cookieName = ?";
+			sql = "select * from Pallet where cookieName = ?";
 			ps = conn.prepareStatement(sql);
 			ps.setString(1, input[0]);
 		} else if(input[1] != null && input[2] == null){
-			sql = "select * from Pallets where cookieName = ? and date <= ?";
+			sql = "select * from Pallet where cookieName = ? and dateOfProduction <= ?";
 			ps = conn.prepareStatement(sql);
 			ps.setString(1, input[0]);
 			ps.setString(2, input[1]);
 		} else if(input[1] == null && input[2] != null){
-			sql = "select * from Pallets where cookieName = ? and date >= ?";
+			sql = "select * from Pallet where cookieName = ? and dateOfProduction >= ?";
 			ps = conn.prepareStatement(sql);
 			ps.setString(1, input[0]);
 			ps.setString(2, input[2]);
 		} else {
-			sql = "select * from Pallets where cookieName = ? and date >= ? and date <= ?";
+			sql = "select * from Pallet where cookieName = ? and dateOfProduction >= ? and dateOfProduction <= ?";
 			ps = conn.prepareStatement(sql);
 			ps.setString(1, input[0]);
 			ps.setString(2, input[1]);
@@ -184,13 +186,14 @@ public class Database {
 		}
 	}
 	
-	public ArrayList<String> showPallet(String palletNbr){
-		String sql = "select * from Pallets where palletNbr = ?";
+	public ArrayList<String> showPallet(String palletNbr) throws Exception{
+		String sql = "select * from Pallet where palletNbr = ?";
 		ArrayList<String> temp = new ArrayList<String>();
 		try {
 			PreparedStatement ps = conn.prepareStatement(sql);
 			ps.setInt(1, Integer.valueOf(palletNbr));
 			ResultSet rs = ps.executeQuery();
+			rs.next();
 			temp.add(palletNbr);
 			temp.add(rs.getString("cookieName"));
 			temp.add(rs.getString("dateOfProduction"));
@@ -201,21 +204,23 @@ public class Database {
 				temp.add("No");
 			}
 			
-		} catch (SQLException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
+			throw new Exception("Fel");
 		}
 		return temp;
 	}
 	
 	public void blockPallet(String input){
-		String sql = "select * from Pallets where palletNbr = ?";
+		String sql = "select * from Pallet where palletNbr = ?";
 		try{
 		PreparedStatement ps = conn.prepareStatement(sql);
 		ps.setInt(1, Integer.valueOf(input));
 		ResultSet rs = ps.executeQuery();
-		sql = "update Pallets set isBlocked = ? where palletNbr = ?";
+		sql = "update Pallet set isBlocked = ? where palletNbr = ?";
 		ps = conn.prepareStatement(sql);
 		ps.setInt(2, Integer.valueOf(input));
+		rs.next();
 		if(rs.getBoolean("isBlocked")){
 			ps.setBoolean(1, false);
 		} else {ps.setBoolean(1, true);}

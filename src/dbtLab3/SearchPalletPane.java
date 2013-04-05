@@ -137,10 +137,12 @@ public class SearchPalletPane extends JPanel implements Pane{
 		all = new JRadioButtonMenuItem("All");
 		all.setSelected(true);
 		menu.add(all);
+		
+		ArrayList<String> cButtons = getCookies();
 		cookieButtons = new JRadioButtonMenuItem[8];
 		cookieButtons[0] = all;
-		for(int i=1; i < 8; i++){
-			cookieButtons[i] = new JRadioButtonMenuItem("Kaka" + i);
+		for(int i=1; i <= cButtons.size(); i++){
+			cookieButtons[i] = new JRadioButtonMenuItem(cButtons.get(i-1));
 			menu.add(cookieButtons[i]);
 		}
 		groupButtons(cookieButtons);
@@ -154,7 +156,7 @@ public class SearchPalletPane extends JPanel implements Pane{
 		Border border = new LineBorder(Color.black);
 		TitledBorder t = new TitledBorder(border, "Search");
 		t.setTitleColor(Color.black);
-		KrustyTextField searchInfo1 = new KrustyTextField("Search by BatchNbr");
+		KrustyTextField searchInfo1 = new KrustyTextField("Search by Pallet Number");
 		searchInfo1.setFont(newTextFieldFont);
 		KrustyTextField searchInfo2 = new KrustyTextField("Search by Date or Name");
 		searchInfo2.setFont(newTextFieldFont);
@@ -177,18 +179,7 @@ public class SearchPalletPane extends JPanel implements Pane{
 	
 	public JComponent createMiddlePanel() {
 		batchNrListModel = new DefaultListModel();
-		batchNrListModel.addElement("1");
-		batchNrListModel.addElement("2");
-		batchNrListModel.addElement("3");
-		batchNrListModel.addElement("4");
-		batchNrListModel.addElement("5");
-		batchNrListModel.addElement("6");
-		batchNrListModel.addElement("7");
-		batchNrListModel.addElement("8");
-		batchNrListModel.addElement("9");
-		batchNrListModel.addElement("10");
-		batchNrListModel.addElement("11");
-		batchNrListModel.addElement("12");
+		batchNrListModel.addElement("");
 		batches = new JList(batchNrListModel);
 		batches.addListSelectionListener(new ListActionHandler());
 		batches.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -196,7 +187,7 @@ public class SearchPalletPane extends JPanel implements Pane{
 		JScrollPane scroll = new JScrollPane(batches);
 		scroll.setVerticalScrollBar(new JScrollBar());
 		Border border = new LineBorder(Color.black);
-		TitledBorder t = new TitledBorder(border, "Batch Numbers");
+		TitledBorder t = new TitledBorder(border, "Pallet Numbers");
 		p.setBorder(t);
 		p.add(scroll);
 		return p;
@@ -204,7 +195,7 @@ public class SearchPalletPane extends JPanel implements Pane{
 	
 	
 	public JComponent createRightBottomPanel() {
-		block = new JButton("Block Batch");
+		block = new JButton("Block / Unblock");
 		BlockButtonActionHandler blockActHand = new BlockButtonActionHandler(block);
 		return block;
 	}
@@ -215,10 +206,10 @@ public class SearchPalletPane extends JPanel implements Pane{
 		TitledBorder t = new TitledBorder(border, "Information");
 		p.setBorder(t);
 		fields = new JTextField[10];
-		fields[0] = new KrustyTextField("Batch Number");
+		fields[0] = new KrustyTextField("Pallet Number");
 		fields[2] = new KrustyTextField("Cookie Name");
 		fields[4] = new KrustyTextField("Production Date");
-		fields[6] = new KrustyTextField("Quality Index");
+		fields[6] = new KrustyTextField("Current Location");
 		fields[8] = new KrustyTextField("Blocked");
 		p.setLayout(new GridLayout(10, 1));
 		for(int i = 1; i < 10; i = i+2){
@@ -235,7 +226,12 @@ public class SearchPalletPane extends JPanel implements Pane{
 private void fetchPalletNr() {
 	clearErrorField();
 	batchNrListModel.removeAllElements();
+	try{
     batchNrListModel.addElement(db.getPallet(batchNrField.getText()));
+	} catch (Exception e){
+		errorField.setText(e.getMessage());
+		batchNrListModel.addElement("");
+	}
 	}
 
 private void blockPallet(String input) {
@@ -276,12 +272,14 @@ private void fetchBatch() {
 
 private void fetchInformation(String input) {
 	clearErrorField();
-    ArrayList<String> batchNbrs = db.showPallet(input);
+	ArrayList<String> batchNbrs;
+	try{
+    batchNbrs = db.showPallet(input);
     fields[1].setText(input);
-    if(batchNbrs.size() < 5){
-    	errorField.setText("Database error");
+	} catch (Exception e){
+    	errorField.setText(e.getMessage());
     	return;
-    }
+	}
     for(int i = 3; i < 10; i = i+2){
     fields[i].setText((batchNbrs.get((i-1)/2)));
     }
@@ -297,6 +295,10 @@ private void clearInformationField(){
 	for(int i = 1; i < 10; i = i+2){
 	fields[i].setText(" ");
 }
+}
+
+private ArrayList<String> getCookies(){
+	return db.allCookies();
 }
 
 class BlockButtonActionHandler implements ActionListener {
@@ -345,8 +347,9 @@ class DateSearchButtonActionHandler implements ActionListener {
 class ListActionHandler implements ListSelectionListener {
 	@Override
 	public void valueChanged(ListSelectionEvent arg0) {
-		try{ fetchInformation(( (String) (batches.getSelectedValue())));
-		} catch (NullPointerException e2){
+		try{
+			fetchInformation(( (Integer) (batches.getSelectedValue())).toString());
+		} catch (Exception e){
 			errorField.setText("No data entered");
 		}
 		
