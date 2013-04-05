@@ -238,6 +238,11 @@ private void fetchPalletNr() {
     batchNrListModel.addElement(db.getPallet(batchNrField.getText()));
 	}
 
+private void blockPallet(String input) {
+	clearErrorField();
+	db.blockPallet(input);
+	}
+
 
 private void fetchBatch() {
 	clearErrorField();
@@ -271,16 +276,14 @@ private void fetchBatch() {
 
 private void fetchInformation(String input) {
 	clearErrorField();
-	for(int i = 1; i < 8; i = i+2){
-		fields[i].setText("");
-	}
     ArrayList<String> batchNbrs = db.showPallet(input);
     fields[1].setText(input);
+    if(batchNbrs.size() < 5){
+    	errorField.setText("Database error");
+    	return;
+    }
     for(int i = 3; i < 10; i = i+2){
     fields[i].setText((batchNbrs.get((i-1)/2)));
-    }
-    if(batchNbrs.get(4).equals("Yes")){
-    	/*block.setBlocked();*/
     }
     
     
@@ -288,6 +291,12 @@ private void fetchInformation(String input) {
 
 private void clearErrorField(){
 	errorField.setText(" ");
+}
+
+private void clearInformationField(){
+	for(int i = 1; i < 10; i = i+2){
+	fields[i].setText(" ");
+}
 }
 
 class BlockButtonActionHandler implements ActionListener {
@@ -298,7 +307,11 @@ class BlockButtonActionHandler implements ActionListener {
 	
 	
 	public void actionPerformed(ActionEvent e) {
-		try{}
+		
+		try{String input = fields[1].getText();
+			blockPallet(input);
+		clearInformationField();
+		fetchInformation(input);}
 		catch (NullPointerException e2){
 			errorField.setText("No data entered");
 		}	

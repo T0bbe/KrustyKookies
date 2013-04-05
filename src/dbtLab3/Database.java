@@ -207,5 +207,23 @@ public class Database {
 		return temp;
 	}
 	
+	public void blockPallet(String input){
+		String sql = "select * from Pallets where palletNbr = ?";
+		try{
+		PreparedStatement ps = conn.prepareStatement(sql);
+		ps.setInt(1, Integer.valueOf(input));
+		ResultSet rs = ps.executeQuery();
+		sql = "update Pallets set isBlocked = ? where palletNbr = ?";
+		ps = conn.prepareStatement(sql);
+		ps.setInt(2, Integer.valueOf(input));
+		if(rs.getBoolean("isBlocked")){
+			ps.setBoolean(1, false);
+		} else {ps.setBoolean(1, true);}
+		ps.executeUpdate();}
+		catch(Exception e){
+			e.printStackTrace();
+		}
+	}
+	
 
 }
