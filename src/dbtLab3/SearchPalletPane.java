@@ -53,7 +53,7 @@ public class SearchPalletPane extends JPanel implements Pane{
      */
     protected JLabel errorField;
 	
-	private DefaultListModel batchNrListModel;
+	private DefaultListModel<Integer> batchNrListModel;
 	
 	
 	// 1 för BatchNr, 3 för Kaknamn, 5 för Produktionsdatum och 7 för QualIndex.
@@ -88,6 +88,8 @@ public class SearchPalletPane extends JPanel implements Pane{
 	private JMenu menu;
 	
 	private ButtonGroup buttonGroup;
+	
+	private ListActionHandler lActHand;
 	
 	public SearchPalletPane(Database db) {
 	        this.db = db;
@@ -179,9 +181,10 @@ public class SearchPalletPane extends JPanel implements Pane{
 	
 	public JComponent createMiddlePanel() {
 		batchNrListModel = new DefaultListModel();
-		batchNrListModel.addElement("");
 		batches = new JList(batchNrListModel);
-		batches.addListSelectionListener(new ListActionHandler());
+		batches.setVisible(false);
+		lActHand = new ListActionHandler();
+		batches.addListSelectionListener(lActHand);
 		batches.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		JPanel p = new JPanel();
 		JScrollPane scroll = new JScrollPane(batches);
@@ -228,9 +231,10 @@ private void fetchPalletNr() {
 	batchNrListModel.removeAllElements();
 	try{
     batchNrListModel.addElement(db.getPallet(batchNrField.getText()));
+    batches.setVisible(true);
 	} catch (Exception e){
 		errorField.setText(e.getMessage());
-		batchNrListModel.addElement("");
+		batches.setVisible(false);
 	}
 	}
 
@@ -266,7 +270,12 @@ private void fetchBatch() {
 		errorField.setText(e.getMessage());
 	}
 	batchNrListModel.removeAllElements();
-    batchNrListModel.addElement(db.getBatch(searchCriterias));
+	ArrayList<String> output = db.getBatch(searchCriterias);
+	for(int j = 0; j < output.size(); j++){
+    batchNrListModel.addElement(Integer.valueOf((output.get(j))));
+    batches.setVisible(true);
+	}
+	/*lActHand.valueChanged(null);*/
 	}
 	}
 
@@ -350,7 +359,7 @@ class ListActionHandler implements ListSelectionListener {
 		try{
 			fetchInformation(( (Integer) (batches.getSelectedValue())).toString());
 		} catch (Exception e){
-			errorField.setText("No data entered");
+			clearInformationField();
 		}
 		
 	}

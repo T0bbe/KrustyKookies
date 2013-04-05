@@ -1,6 +1,8 @@
 package dbtLab3;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.sql.*;
 
 /**
@@ -8,6 +10,9 @@ import java.sql.*;
  * JDBC and the MySQL Connector/J driver.
  */
 public class Database {
+	
+	private int palletsToRegister = 0;
+	
 	/**
 	 * The database connection.
 	 */
@@ -42,9 +47,8 @@ public class Database {
 	public boolean openConnection(String userName, String password) {
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
-			conn = DriverManager.getConnection(
-					"jdbc:mysql://localhost/" + userName, userName,
-					password);
+			conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/"
+					+ userName, userName, password);
 		} catch (SQLException e) {
 			e.printStackTrace();
 			return false;
@@ -77,6 +81,11 @@ public class Database {
 		return conn != null;
 	}
 
+	/** 
+	 *  Retrieves all cookies
+	 *  
+	 * @return all cookie names
+	 */
 	public ArrayList<String> allCookies() {
 		String sql = "select * from Recipes";
 		ArrayList<String> cookies = new ArrayList<String>();
@@ -91,46 +100,285 @@ public class Database {
 		}
 		return cookies;
 	}
-	
-	//calculates how the amount of cookies should be spread,
-	private ArrayList<Integer> calc(int cookies){
+
+	/** 
+	 *  Calculate how an amount of cookies should be distributed
+	 *  
+	 *  @param int cookies; the amount/number of cookies the user has inputed in an int
+	 * @return the arrayList of the spread
+	 */
+	private ArrayList<Integer> calc(int cookies) {
 		ArrayList<Integer> lefts = new ArrayList<Integer>();
 		int nbrOfBags = 0;
 		int nbrOfBoxes = 0;
 		int nbrOfPallets = 0;
-		while(cookies >= 15){
+		while (cookies >= 15) {
 			nbrOfBags++;
 			cookies = cookies - 15;
 		}
-		while(nbrOfBags >= 10){
+		while (nbrOfBags >= 10) {
 			nbrOfBoxes++;
 			nbrOfBags = nbrOfBags - 10;
 		}
-		while(nbrOfBoxes >= 36){
+		while (nbrOfBoxes >= 36) {
 			nbrOfPallets++;
 			nbrOfBoxes = nbrOfBoxes - 36;
 		}
-		lefts.add(cookies);
-		lefts.add(nbrOfBags);
-		lefts.add(nbrOfBoxes);
-		lefts.add(nbrOfPallets);
+		lefts.add(0, cookies);
+		lefts.add(1, nbrOfBags);
+		lefts.add(2, nbrOfBoxes);
+		lefts.add(3, nbrOfPallets);
 		return lefts;
 	}
 	
-	public void buildPallet(String cookieName, String cookies) {
-		int nbrCookies = Integer.parseInt(cookies);
+	
+	/** 
+	 *  Inserts new pallets into the database 
+	 *  
+	 * @param String cookieName
+	 * @param String cookies; the amount/number of cookies the user has inputed in a String 
+	 * @return the arrayList of the spread, see above method
+	 */
+	public ArrayList<Integer> buildPallet(String cookieName, String cookies) {
+		int nbrCookies = 0;
+		//den här try blocket borde göras om, för att programmet borde inte stänga av sig.
+		try{
+			nbrCookies = Integer.parseInt(cookies);
+		}catch(NumberFormatException nuff){
+			return null;
+		}
 		ArrayList<Integer> nbrOfLeft = calc(nbrCookies);
-		while(nbrOfLeft.get(3) >= 1){
-			String sql = "insert into Pallet(null, '2013-03-20', false, 'InProduction', cookieName)";
+		int pallets = nbrOfLeft.get(3);
+		palletsToRegister = pallets;
+		while (pallets >= 1) {
+			String sql = "insert into Pallet(palletNbr, dateOfProduction, isBlocked, currentLocation, cookieName) values(null, null, false, 'InProduction', ?)";
 			try {
 				PreparedStatement ps = conn.prepareStatement(sql);
-				ResultSet rs = ps.executeQuery();
+				ps.setString(1, cookieName);
+				ps.executeUpdate();
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
-			nbrOfLeft.add(3, nbrOfLeft.get(3) -1); 
+			pallets--;
 		}
+		return nbrOfLeft;
+	}
+	
+	
+	/** 
+	 *  Updates built pallets which has yet not have
+	 *  their barcode read at the deep freeze storage.
+	 *  
+	 */
+	public void readPalletCode() {
+		int palletNbr = getLastBuiltPallet();
+		while (palletsToRegister > 0) {
+			String timeStamp = getCurrentTimeStamp();
+			String sql = "update Pallet set currentLocation = 'DeepFreeze' where palletNbr = ?";
+			String sql2 = "update Pallet set dateOfProduction = ? where palletNbr = ?";
+			String sql3 = "update Pallet set dateOfProduction = ? where palletNbr = ?";
+			try {
+				PreparedStatement loc = conn.prepareStatement(sql);
+				loc.setInt(1, palletNbr);
+				PreparedStatement date = conn.prepareStatement(sql2);
+				date.setString(1, new String(timeStamp.subSequence(0,4) + "-" + timeStamp.subSequence(4, 6) + "-" + timeStamp.subSequence(6, 8)));
+				date.setInt(2, palletNbr);
+				PreparedStatement time = conn.prepareStatement(sql3);
+				time.setString(1, new String(timeStamp.substring(11, 13)) + "." + timeStamp.substring(13,15));
+				loc.executeUpdate();
+				date.executeUpdate();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+			palletNbr--;
+			palletsToRegister--;
 		}
+	}
+	
+	/** 
+	 *  Get the current time stamp from the running computer
+	 *  
+	 *  @return the current time stamp in the pre-defined format; example: "20130404_135711"
+	 */
+	private static String getCurrentTimeStamp() {
+		Calendar cal = Calendar.getInstance();
+		SimpleDateFormat sdfDate = new SimpleDateFormat("yyyyMMdd_HHmmss");
+		String date = sdfDate.format(cal.getTime());
+		return date;
+	}
+
+	public Integer getPallet(int palletNbr) {
+		String sql = "select * from Pallets where palletNbr = ?";
+		int temp = 0;
+		try {
+			PreparedStatement ps = conn.prepareStatement(sql);
+			ps.setInt(1, palletNbr);
+			ResultSet rs = ps.executeQuery();
+			temp = rs.getInt("PalletNbr");
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return temp;
+	}
+
+	public ArrayList<String> getBatch(String date) {
+		String sql = "select * from Pallets where date = ?";
+		ArrayList<String> temp = new ArrayList<String>();
+		try {
+			PreparedStatement ps = conn.prepareStatement(sql);
+			ps.setString(1, date);
+			ResultSet rs = ps.executeQuery();
+			temp.add(((Integer) rs.getInt("PalletNbr")).toString());
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return temp;
+	}
+
+	public ArrayList<String> showPallet(Integer palletNbr) {
+		String sql = "select * from Pallets where palletNbr = ?";
+		ArrayList<String> temp = new ArrayList<String>();
+		try {
+			PreparedStatement ps = conn.prepareStatement(sql);
+			ps.setInt(1, palletNbr);
+			ResultSet rs = ps.executeQuery();
+			temp.add(palletNbr.toString());
+			temp.add(rs.getString("cookieName"));
+			temp.add(rs.getString("dateOfProduction"));
+			temp.add(rs.getString("currentLocation"));
+			if (rs.getBoolean("isBlocked")) {
+				temp.add("Yes");
+			} else {
+				temp.add("No");
+			}
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return temp;
+	}
+	
+	
+	/** 
+	 *  Calculates and updates the new amount value for
+	 *  each ingredients for a cookieName
+	 *  
+	 *  @param String cookieName
+	 */
+	public void updateRaws(String cookieName) {
+		ArrayList<String> materials = getIng(cookieName);
+		for (int i = 0; i < materials.size(); i++) {
+			ResultSet rs1 = null;
+			ResultSet rs2 = null;
+			String materialType = materials.get(i);
+			int amountInStock = 0;
+			int amountNeeded = 0;
+			String sql1 = "select amountNeeded from RecipesHasIngridients where materialType = ?";
+			try {
+				PreparedStatement ps = conn.prepareStatement(sql1);
+				ps.setString(1, materialType);
+				rs1 = ps.executeQuery();
+				if(rs1.next()){
+					amountNeeded = rs1.getInt("amountNeeded");
+				};
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+			String sql2 = "select amountInStock from RawMaterials where materialType = ?";
+			try {
+				PreparedStatement ps = conn.prepareStatement(sql2);
+				ps.setString(1, materialType);
+				rs2 = ps.executeQuery();
+				if(rs2.next()){
+					amountInStock = rs2.getInt("amountInStock");
+				};
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+			int howManyPallets = PalletsProduced(cookieName);
+			int calc = amountInStock - howManyPallets * 54 * amountNeeded;
+			String sql3 = "update RawMaterials set amountInStock = ? where materialType = ?";
+			try {
+				PreparedStatement ps3 = conn.prepareStatement(sql3);
+				ps3.setInt(1, calc);
+				ps3.setString(2, materialType);
+				ps3.executeUpdate();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	/** 
+	 *  Calculates the number of pallets
+	 *  which have been moved to the deep
+	 *  freeze storage and thus have had its
+	 *  barcode read. They have been produced.
+	 *  
+	 *  @param String cookieName
+	 *  @return the number of pallets
+	 */
+	private int PalletsProduced(String cookieName) {
+		int howManyPallets = 0;
+		String sql = "select count(*) as pallets from Pallet where cookieName = ? and currentLocation = 'DeepFreeze'";
+		try {
+			PreparedStatement ps = conn.prepareStatement(sql);
+			ps.setString(1, cookieName);
+			ResultSet rs = ps.executeQuery();
+			if(rs.next()){
+				howManyPallets = rs.getInt("pallets");
+			};
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return howManyPallets;
+	}
+	
+	/** 
+	 * Stores every ingredients for a specific cookie
+	 *  
+	 *  @param String cookieName
+	 *  @return an arrayList of all ingredients for a cookie
+	 */
+	private ArrayList<String> getIng(String cookieName) {
+		String sqlIng = "select materialType from RecipesHasIngridients where cookieName = ?";
+		ArrayList<String> materials = new ArrayList<String>();
+		ResultSet rs = null;
+		try {
+			PreparedStatement ps = conn.prepareStatement(sqlIng);
+			ps.setString(1, cookieName);
+			rs = ps.executeQuery();
+			while (rs.next()) {
+				materials.add(rs.getString("materialType"));
+			}
+			;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return materials;
+	}
+	
+	/** 
+	 *  Fetches the palletNbr of the last built pallet
+	 * 
+	 *  @return the palletNbr for the last built pallet
+	 */
+	private int getLastBuiltPallet(){
+		int palletNbr = 0;
+		String sql = "select palletNbr from Pallet order by palletNbr";
+		try{
+			PreparedStatement ps = conn.prepareStatement(sql);
+			ResultSet rs = ps.executeQuery();
+			rs.last();
+			return rs.getInt("palletNbr");
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		return palletNbr;
+	}
 	
 	public Integer getPallet(String palletNbr) throws Exception {
 		String sql = "select * from Pallet where palletNbr = ?";
@@ -151,23 +399,26 @@ public class Database {
 	public ArrayList<String> getBatch(String[] input) {
 		PreparedStatement ps;
 		String sql;
+		if(input[0] == "All"){
+			input[0] = "%";
+		}
 		try {
 		if(input[1] == null && input[2] == null){
-			sql = "select * from Pallet where cookieName = ?";
+			sql = "select * from Pallet where cookieName like ?";
 			ps = conn.prepareStatement(sql);
 			ps.setString(1, input[0]);
 		} else if(input[1] != null && input[2] == null){
-			sql = "select * from Pallet where cookieName = ? and dateOfProduction <= ?";
+			sql = "select * from Pallet where cookieName like ? and dateOfProduction >= ?";
 			ps = conn.prepareStatement(sql);
 			ps.setString(1, input[0]);
 			ps.setString(2, input[1]);
 		} else if(input[1] == null && input[2] != null){
-			sql = "select * from Pallet where cookieName = ? and dateOfProduction >= ?";
+			sql = "select * from Pallet where cookieName like ? and dateOfProduction <= ?";
 			ps = conn.prepareStatement(sql);
 			ps.setString(1, input[0]);
 			ps.setString(2, input[2]);
 		} else {
-			sql = "select * from Pallet where cookieName = ? and dateOfProduction >= ? and dateOfProduction <= ?";
+			sql = "select * from Pallet where cookieName like ? and dateOfProduction >= ? and dateOfProduction <= ?";
 			ps = conn.prepareStatement(sql);
 			ps.setString(1, input[0]);
 			ps.setString(2, input[1]);
@@ -176,10 +427,9 @@ public class Database {
 		
 		ArrayList<String> result = new ArrayList<String>();
 		ResultSet rs = ps.executeQuery();
-		for(int i = 0; i < rs.getFetchSize(); i++)
-		result.add(((Integer) rs.getInt("PalletNbr")).toString());
-			rs.next();
-			return result;
+		while(rs.next()){
+		result.add(((Integer) rs.getInt("PalletNbr")).toString());}
+		return result;
 		} catch (SQLException e) {
 			e.printStackTrace();
 			return null;
@@ -206,7 +456,7 @@ public class Database {
 			
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new Exception("Fel");
+			throw new Exception("No Pallet Selected");
 		}
 		return temp;
 	}

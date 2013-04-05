@@ -7,10 +7,10 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-public class CookieInput extends JPanel {
+public class LeftOverdata extends JPanel {
 	private static final long serialVersionUID = 1;
-
-	public CookieInput(String[] texts, JTextField[] fields){
+	
+	public LeftOverdata(String[] texts, JTextField[] fields){
 		JPanel left = new JPanel();
 		left.setLayout(new GridLayout(texts.length, 1));
 		for (int i = 0; i < texts.length; i++) {
@@ -28,7 +28,5 @@ public class CookieInput extends JPanel {
 		add(left);
 		add(right);
 	}
-	
 
-	
 }

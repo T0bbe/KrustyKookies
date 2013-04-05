@@ -10,7 +10,7 @@ import javax.swing.JTextField;
 public class CookieInput extends JPanel {
 	private static final long serialVersionUID = 1;
 
-	public CookieInput(String[] texts, JTextField[] fields){
+	public CookieInput(String[] texts, JTextField fields){
 		JPanel left = new JPanel();
 		left.setLayout(new GridLayout(texts.length, 1));
 		for (int i = 0; i < texts.length; i++) {
@@ -19,10 +19,7 @@ public class CookieInput extends JPanel {
 		}
 
 		JPanel right = new JPanel();
-		right.setLayout(new GridLayout(fields.length, 1));
-		for (int i = 0; i < fields.length; i++) {
-			right.add(fields[i]);
-		}
+		right.add(fields);
 
 		setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 		add(left);

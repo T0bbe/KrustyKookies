@@ -2,7 +2,7 @@ package dbtLab3;
 
 import javax.swing.JComponent;
 
-public class WelcomePane extends BasicPane {
+public class WelcomePane extends BasicPane implements Pane {
 
 	public WelcomePane(Database db) {
 		super(db);

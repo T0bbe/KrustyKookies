@@ -5,14 +5,13 @@ import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
 import javax.swing.JComponent;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-public class BuildPallet extends JComponent {
+public class PutPalletInDeepFreeze extends JComponent {
 	private static final long serialVersionUID = 1;
 	
-	public BuildPallet(JButton[] buttons,
-			ActionListener actHand) {
+	public PutPalletInDeepFreeze(JButton[] buttons,
+			ActionListener actHand){
 		setLayout(new GridLayout(2, 1));
 
 		JPanel buttonPanel = new JPanel();
@@ -23,8 +22,6 @@ public class BuildPallet extends JComponent {
 
 		for (int i = 0; i < buttons.length; i++) {
 			buttons[i].addActionListener(actHand);
-		}
+		}	
 	}
-
-
 }

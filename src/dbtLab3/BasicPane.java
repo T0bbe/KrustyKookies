@@ -14,7 +14,7 @@ import java.awt.*;
  * The class contains a reference to the database object, so subclasses
  * can communicate with the database.
  */
-public class BasicPane extends JPanel implements Pane {
+public class BasicPane extends JPanel {
 	private static final long serialVersionUID = 1;
     /**
      * The database object.
@@ -42,16 +42,25 @@ public class BasicPane extends JPanel implements Pane {
                 
         JPanel rightPanel = new JPanel();
         rightPanel.setLayout(new BorderLayout());
+        
+        JPanel buttons = new JPanel();
+        buttons.setLayout(new BorderLayout());
+        
                 
         JComponent topPanel = createTopPanel();
         JComponent middlePanel = createMiddlePanel();
         JComponent bottomPanel = createBottomPanel();
+        JComponent lowBottomPanel = createLowBottomPanel();
+        JComponent middleBottomPanel = createMiddleBottomPanel();
         bottomPanel.setBorder
             (new CompoundBorder(new SoftBevelBorder(BevelBorder.RAISED),
                                 bottomPanel.getBorder()));
         rightPanel.add(topPanel, BorderLayout.NORTH);
         rightPanel.add(middlePanel, BorderLayout.CENTER);
-        rightPanel.add(bottomPanel, BorderLayout.SOUTH);
+        buttons.add(bottomPanel, BorderLayout.NORTH);
+        buttons.add(middleBottomPanel, BorderLayout.CENTER);
+        buttons.add(lowBottomPanel, BorderLayout.SOUTH);
+        rightPanel.add(buttons, BorderLayout.SOUTH);
         add(rightPanel, BorderLayout.CENTER);
     }
         
@@ -89,6 +98,14 @@ public class BasicPane extends JPanel implements Pane {
      */
     public JComponent createBottomPanel() { 
         return new JPanel();
+    }
+    
+    public JComponent createLowBottomPanel(){
+    	return new JPanel();
+    }
+    
+    public JComponent createMiddleBottomPanel(){
+    	return new JPanel();
     }
         
     /**
