@@ -9,7 +9,10 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.StringTokenizer;
 
+import javax.swing.AbstractButton;
 import javax.swing.ButtonGroup;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
@@ -32,6 +35,8 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.border.SoftBevelBorder;
 import javax.swing.border.TitledBorder;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 import dbtLab3.ProductionPane.ActionHandler;
 import dbtLab3.ProductionPane.CookieNameSelectionListener;
@@ -74,16 +79,21 @@ public class SearchPalletPane extends JPanel implements Pane{
 	
 	private JRadioButtonMenuItem[] cookieButtons;
 	
-	private BlockButtonActionHandler blockActHand;
+	private JTextField startDateField;
 	
-	private DateSearchButtonActionHandler dateActHand;
+	private JTextField endDateField;
 	
-	private BatchSearchButtonActionHandler batchActHand;
+	private DateChecker dateChecker;
 	
-	private ListActionHandler lActHand;
+	private JMenu menu;
+	
+	private ButtonGroup buttonGroup;
 	
 	public SearchPalletPane(Database db) {
 	        this.db = db;
+			startDateField = new JTextField();
+			endDateField = new JTextField();
+			dateChecker = new DateChecker();
 	        errorField = new JLabel("                                                 ");
 	        Border border = new LineBorder(Color.black);
 			TitledBorder t = new TitledBorder(border, "Error Message");
@@ -101,36 +111,27 @@ public class SearchPalletPane extends JPanel implements Pane{
 	        
 	        JComponent middlePanel = createMiddlePanel();
 	        JComponent rightBottomPanel = createRightBottomPanel();
-	        JComponent leftBottomPanel = createLeftBottomPanel();
 	        JComponent resultPanel = createRightPanel();
 	        rightBottomPanel.setBorder
 	            (new CompoundBorder(new SoftBevelBorder(BevelBorder.RAISED),
 	                                rightBottomPanel.getBorder()));
-	        leftBottomPanel.setBorder
-            (new CompoundBorder(new SoftBevelBorder(BevelBorder.RAISED),
-                                leftBottomPanel.getBorder()));
+
 	        centerPanel.add(middlePanel, BorderLayout.NORTH);
-	        centerPanel.add(leftBottomPanel, BorderLayout.SOUTH);
 	        add(centerPanel, BorderLayout.CENTER);
 	        rightPanel.add(resultPanel, BorderLayout.CENTER);
 	        rightPanel.add(rightBottomPanel, BorderLayout.SOUTH);
 	        add(rightPanel, BorderLayout.EAST);
 	        add(errorField, BorderLayout.SOUTH);
-		blockActHand = new BlockButtonActionHandler();
+	
 	}
 	
 	public JComponent createLeftPanel() {
 		batchNrField = new JTextField(13);
-		JTextField startDateField = new JTextField();
-		JTextField endDateField = new JTextField();
-		
-		JMenu menu = new JMenu("Select Cookie Name");
+		menu = new JMenu("Select Cookie Name");
 		Font newTextFieldFont = new Font(batchNrField.getFont().getName(),Font.BOLD,batchNrField.getFont().getSize());
 		Font newTextFieldFont2 = new Font(batchNrField.getFont().getName(),Font.PLAIN,batchNrField.getFont().getSize());
 		searchButton1 = new JButton("Perform Search");
-		searchButton1.addActionListener(batchActHand);
 		searchButton2 = new JButton("Perform Search");
-		searchButton2.addActionListener(dateActHand);
 		JMenuBar menuField = new JMenuBar();
 		menu.setFont(newTextFieldFont2);
 		all = new JRadioButtonMenuItem("All");
@@ -146,7 +147,8 @@ public class SearchPalletPane extends JPanel implements Pane{
 		menuField.add(menu);
 		
 		
-		searchButton1.addActionListener(new BlockButtonActionHandler());
+		BatchNrSearchActionHandler batchActHand = new BatchNrSearchActionHandler(searchButton1);
+		DateSearchButtonActionHandler dateActHand = new DateSearchButtonActionHandler(searchButton2);
 		JPanel p = new JPanel();
 		p.setLayout(new GridLayout(12, 1));
 		Border border = new LineBorder(Color.black);
@@ -175,19 +177,20 @@ public class SearchPalletPane extends JPanel implements Pane{
 	
 	public JComponent createMiddlePanel() {
 		batchNrListModel = new DefaultListModel();
-		batchNrListModel.addElement("  1  ");
-		batchNrListModel.addElement("  2  ");
-		batchNrListModel.addElement("  3  ");
-		batchNrListModel.addElement("  4  ");
-		batchNrListModel.addElement("  5  ");
-		batchNrListModel.addElement("  6  ");
-		batchNrListModel.addElement("  7  ");
-		batchNrListModel.addElement("  8  ");
-		batchNrListModel.addElement("  9  ");
-		batchNrListModel.addElement("  10  ");
-		batchNrListModel.addElement("  11  ");
-		batchNrListModel.addElement("  12  ");
+		batchNrListModel.addElement("1");
+		batchNrListModel.addElement("2");
+		batchNrListModel.addElement("3");
+		batchNrListModel.addElement("4");
+		batchNrListModel.addElement("5");
+		batchNrListModel.addElement("6");
+		batchNrListModel.addElement("7");
+		batchNrListModel.addElement("8");
+		batchNrListModel.addElement("9");
+		batchNrListModel.addElement("10");
+		batchNrListModel.addElement("11");
+		batchNrListModel.addElement("12");
 		batches = new JList(batchNrListModel);
+		batches.addListSelectionListener(new ListActionHandler());
 		batches.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		JPanel p = new JPanel();
 		JScrollPane scroll = new JScrollPane(batches);
@@ -199,15 +202,10 @@ public class SearchPalletPane extends JPanel implements Pane{
 		return p;
 	}
 	
-	public JComponent createLeftBottomPanel() {
-		select = new JButton("Select Batch");
-		select.addActionListener(lActHand);
-		return select;
-	}
 	
 	public JComponent createRightBottomPanel() {
 		block = new JButton("Block Batch");
-		block.addActionListener(blockActHand);
+		BlockButtonActionHandler blockActHand = new BlockButtonActionHandler(block);
 		return block;
 	}
 	
@@ -216,84 +214,130 @@ public class SearchPalletPane extends JPanel implements Pane{
 		Border border = new LineBorder(Color.black);
 		TitledBorder t = new TitledBorder(border, "Information");
 		p.setBorder(t);
-		fields = new JTextField[8];
+		fields = new JTextField[10];
 		fields[0] = new KrustyTextField("Batch Number");
 		fields[2] = new KrustyTextField("Cookie Name");
 		fields[4] = new KrustyTextField("Production Date");
 		fields[6] = new KrustyTextField("Quality Index");
-		p.setLayout(new GridLayout(8, 1));
-		for(int i = 1; i < 8; i = i+2){
+		fields[8] = new KrustyTextField("Blocked");
+		p.setLayout(new GridLayout(10, 1));
+		for(int i = 1; i < 10; i = i+2){
 			fields[i] = new JTextField("                                         ");
 			fields[i].setEditable(false);
 		}
-		for(int i = 0; i < 8; i++){
+		for(int i = 0; i < 10; i++){
 			p.add(fields[i]);
 		}
 		
 		return p;
 	}
 
-private void fetchPalletNr(int input) {
+private void fetchPalletNr() {
+	clearErrorField();
 	batchNrListModel.removeAllElements();
-    batchNrListModel.addElement(db.getPallet(input));
-    db.showPallet(input);
-    }
+    batchNrListModel.addElement(db.getPallet(batchNrField.getText()));
+	}
 
 
-private void fetchBatch(String input) {
+private void fetchBatch() {
+	clearErrorField();
+	String[] searchCriterias = new String[3];
+	boolean finished = false;
+	int i = 0;
+	Enumeration<AbstractButton> st = buttonGroup.getElements();
+	while(i < buttonGroup.getButtonCount() && !finished){
+		AbstractButton button = st.nextElement();
+		if(button.isSelected()){
+			searchCriterias[0] = button.getText();
+			finished = true;
+		} 
+		i++;	
+	}
+	{
+	try{
+	if(dateChecker.checkDate(startDateField)){
+		searchCriterias[1] = startDateField.getText();
+	}
+	if(dateChecker.checkDate(endDateField)){
+		searchCriterias[2] = endDateField.getText();
+	}
+	} catch (Exception e){
+		errorField.setText(e.getMessage());
+	}
 	batchNrListModel.removeAllElements();
-    ArrayList<String> batchNbrs = db.getBatch(input);
-    for(int i = 0; i < batchNbrs.size(); i++){
-    batchNrListModel.addElement(batchNbrs.get(i));
-    }
-}
+    batchNrListModel.addElement(db.getBatch(searchCriterias));
+	}
+	}
 
-private void fetchInformation(int input) {
+private void fetchInformation(String input) {
+	clearErrorField();
 	for(int i = 1; i < 8; i = i+2){
 		fields[i].setText("");
 	}
     ArrayList<String> batchNbrs = db.showPallet(input);
-    for(int i = 1; i < 8; i = i+2){
+    fields[1].setText(input);
+    for(int i = 3; i < 10; i = i+2){
     fields[i].setText((batchNbrs.get((i-1)/2)));
     }
-    if(batchNbrs.get(4).equals("1")){
+    if(batchNbrs.get(4).equals("Yes")){
     	/*block.setBlocked();*/
     }
     
     
 }
+
+private void clearErrorField(){
+	errorField.setText(" ");
+}
+
 class BlockButtonActionHandler implements ActionListener {
 	
+	BlockButtonActionHandler(JButton b){
+		b.addActionListener(this);
+	}
+	
+	
 	public void actionPerformed(ActionEvent e) {
-		try{ fetchBatch(batchNrField.getText());
-		} catch (NullPointerException e2){
+		try{}
+		catch (NullPointerException e2){
 			errorField.setText("No data entered");
 		}	
 	}
 }
 
-class BatchSearchButtonActionHandler implements ActionListener {
+class BatchNrSearchActionHandler implements ActionListener {
+	
+	BatchNrSearchActionHandler(JButton b){
+		b.addActionListener(this);
+	}
 	
 	public void actionPerformed(ActionEvent e) {
-
+    fetchPalletNr();
 }
 }
 
 class DateSearchButtonActionHandler implements ActionListener {
 			
-			public void actionPerformed(ActionEvent e) {
+	DateSearchButtonActionHandler(JButton b){
+		b.addActionListener(this);
+	}
+	
+		public void actionPerformed(ActionEvent e) {
+			fetchBatch();
+					
 				}
-			}
+				}
 			
 		
-class ListActionHandler implements ActionListener {
-	
-	public void actionPerformed(ActionEvent e) {
-		try{ fetchBatch(batchNrField.getText());
+class ListActionHandler implements ListSelectionListener {
+	@Override
+	public void valueChanged(ListSelectionEvent arg0) {
+		try{ fetchInformation(( (String) (batches.getSelectedValue())));
 		} catch (NullPointerException e2){
 			errorField.setText("No data entered");
 		}
-}
+		
+	}
 }
 
 
@@ -304,7 +348,7 @@ public void entryActions() {
 }
 
 public void groupButtons(JRadioButtonMenuItem[] buttons) {
-ButtonGroup buttonGroup = new ButtonGroup();
+buttonGroup = new ButtonGroup();
 for(int i = 0; i < buttons.length; i++){
 	buttonGroup.add(buttons[i]);
 }

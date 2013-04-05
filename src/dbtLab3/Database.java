@@ -131,12 +131,12 @@ public class Database {
 		}
 		}
 	
-	public Integer getPallet(int palletNbr) {
+	public Integer getPallet(String palletNbr) {
 		String sql = "select * from Pallets where palletNbr = ?";
 		int temp = 0;
 		try {
 			PreparedStatement ps = conn.prepareStatement(sql);
-			ps.setInt(1, palletNbr);
+			ps.setInt(1, Integer.valueOf(palletNbr));
 			ResultSet rs = ps.executeQuery();
 			temp = rs.getInt("PalletNbr");
 			
@@ -146,29 +146,52 @@ public class Database {
 		return temp;
 	}
 	
-	public ArrayList<String> getBatch(String date) {
-		String sql = "select * from Pallets where date = ?";
-		ArrayList<String> temp = new ArrayList<String>();
+	public ArrayList<String> getBatch(String[] input) {
+		PreparedStatement ps;
+		String sql;
 		try {
-			PreparedStatement ps = conn.prepareStatement(sql);
-			ps.setString(1, date);
-			ResultSet rs = ps.executeQuery();
-			temp.add(((Integer) rs.getInt("PalletNbr")).toString());
-			
+		if(input[1] == null && input[2] == null){
+			sql = "select * from Pallets where cookieName = ?";
+			ps = conn.prepareStatement(sql);
+			ps.setString(1, input[0]);
+		} else if(input[1] != null && input[2] == null){
+			sql = "select * from Pallets where cookieName = ? and date <= ?";
+			ps = conn.prepareStatement(sql);
+			ps.setString(1, input[0]);
+			ps.setString(2, input[1]);
+		} else if(input[1] == null && input[2] != null){
+			sql = "select * from Pallets where cookieName = ? and date >= ?";
+			ps = conn.prepareStatement(sql);
+			ps.setString(1, input[0]);
+			ps.setString(2, input[2]);
+		} else {
+			sql = "select * from Pallets where cookieName = ? and date >= ? and date <= ?";
+			ps = conn.prepareStatement(sql);
+			ps.setString(1, input[0]);
+			ps.setString(2, input[1]);
+			ps.setString(3, input[2]);
+		}
+		
+		ArrayList<String> result = new ArrayList<String>();
+		ResultSet rs = ps.executeQuery();
+		for(int i = 0; i < rs.getFetchSize(); i++)
+		result.add(((Integer) rs.getInt("PalletNbr")).toString());
+			rs.next();
+			return result;
 		} catch (SQLException e) {
 			e.printStackTrace();
+			return null;
 		}
-		return temp;
 	}
 	
-	public ArrayList<String> showPallet(Integer palletNbr){
+	public ArrayList<String> showPallet(String palletNbr){
 		String sql = "select * from Pallets where palletNbr = ?";
 		ArrayList<String> temp = new ArrayList<String>();
 		try {
 			PreparedStatement ps = conn.prepareStatement(sql);
-			ps.setInt(1, palletNbr);
+			ps.setInt(1, Integer.valueOf(palletNbr));
 			ResultSet rs = ps.executeQuery();
-			temp.add(palletNbr.toString());
+			temp.add(palletNbr);
 			temp.add(rs.getString("cookieName"));
 			temp.add(rs.getString("dateOfProduction"));
 			temp.add(rs.getString("currentLocation"));
