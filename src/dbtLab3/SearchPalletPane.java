@@ -51,7 +51,7 @@ public class SearchPalletPane extends JPanel implements Pane{
     /**
      * A label which is intended to contain a message text.
      */
-    protected JLabel errorField;
+    protected JLabel messageLabel;
 	
 	private DefaultListModel<Integer> batchNrListModel;
 	
@@ -96,10 +96,10 @@ public class SearchPalletPane extends JPanel implements Pane{
 			startDateField = new JTextField();
 			endDateField = new JTextField();
 			dateChecker = new DateChecker();
-	        errorField = new JLabel("                                                 ");
+	        messageLabel = new JLabel("                                                 ");
 	        Border border = new LineBorder(Color.black);
-			TitledBorder t = new TitledBorder(border, "Error Message");
-			errorField.setBorder(t);
+			TitledBorder t = new TitledBorder(border, "Message Field");
+			messageLabel.setBorder(t);
 	        
 	        setLayout(new BorderLayout());
 	        
@@ -118,12 +118,12 @@ public class SearchPalletPane extends JPanel implements Pane{
 	            (new CompoundBorder(new SoftBevelBorder(BevelBorder.RAISED),
 	                                rightBottomPanel.getBorder()));
 
-	        centerPanel.add(middlePanel, BorderLayout.NORTH);
+	        centerPanel.add(middlePanel, BorderLayout.CENTER);
 	        add(centerPanel, BorderLayout.CENTER);
 	        rightPanel.add(resultPanel, BorderLayout.CENTER);
 	        rightPanel.add(rightBottomPanel, BorderLayout.SOUTH);
 	        add(rightPanel, BorderLayout.EAST);
-	        add(errorField, BorderLayout.SOUTH);
+	        add(messageLabel, BorderLayout.SOUTH);
 	
 	}
 	
@@ -182,17 +182,22 @@ public class SearchPalletPane extends JPanel implements Pane{
 	public JComponent createMiddlePanel() {
 		batchNrListModel = new DefaultListModel();
 		batches = new JList(batchNrListModel);
-		batches.setVisible(false);
 		lActHand = new ListActionHandler();
 		batches.addListSelectionListener(lActHand);
 		batches.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		batches.setMaximumSize(new Dimension(100,100));
 		JPanel p = new JPanel();
 		JScrollPane scroll = new JScrollPane(batches);
+		scroll.setMaximumSize(new Dimension(100,100));
+		p.setMaximumSize(new Dimension(100,100));
 		scroll.setVerticalScrollBar(new JScrollBar());
 		Border border = new LineBorder(Color.black);
 		TitledBorder t = new TitledBorder(border, "Pallet Numbers");
+		p.setLayout(new GridLayout(1, 3));
 		p.setBorder(t);
+		p.add(new JPanel());
 		p.add(scroll);
+		p.add(new JPanel());
 		return p;
 	}
 	
@@ -228,19 +233,26 @@ public class SearchPalletPane extends JPanel implements Pane{
 
 private void fetchPalletNr() {
 	clearErrorField();
+	if(batchNrField.getText().equals("")){
+		messageLabel.setText("No data entered");
+		return;
+	}
 	batchNrListModel.removeAllElements();
 	try{
     batchNrListModel.addElement(db.getPallet(batchNrField.getText()));
-    batches.setVisible(true);
 	} catch (Exception e){
-		errorField.setText(e.getMessage());
-		batches.setVisible(false);
+		messageLabel.setText(e.getMessage());
 	}
 	}
 
 private void blockPallet(String input) {
 	clearErrorField();
+	try{
 	db.blockPallet(input);
+	}
+	catch(Exception e){
+		messageLabel.setText(e.getMessage());
+	}
 	}
 
 
@@ -267,13 +279,12 @@ private void fetchBatch() {
 		searchCriterias[2] = endDateField.getText();
 	}
 	} catch (Exception e){
-		errorField.setText(e.getMessage());
+		messageLabel.setText(e.getMessage());
 	}
 	batchNrListModel.removeAllElements();
 	ArrayList<String> output = db.getBatch(searchCriterias);
 	for(int j = 0; j < output.size(); j++){
     batchNrListModel.addElement(Integer.valueOf((output.get(j))));
-    batches.setVisible(true);
 	}
 	/*lActHand.valueChanged(null);*/
 	}
@@ -286,7 +297,7 @@ private void fetchInformation(String input) {
     batchNbrs = db.showPallet(input);
     fields[1].setText(input);
 	} catch (Exception e){
-    	errorField.setText(e.getMessage());
+    	messageLabel.setText(e.getMessage());
     	return;
 	}
     for(int i = 3; i < 10; i = i+2){
@@ -297,7 +308,7 @@ private void fetchInformation(String input) {
 }
 
 private void clearErrorField(){
-	errorField.setText(" ");
+	messageLabel.setText(" ");
 }
 
 private void clearInformationField(){
@@ -324,7 +335,7 @@ class BlockButtonActionHandler implements ActionListener {
 		clearInformationField();
 		fetchInformation(input);}
 		catch (NullPointerException e2){
-			errorField.setText("No data entered");
+			messageLabel.setText("No data entered");
 		}	
 	}
 }

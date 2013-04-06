@@ -1,5 +1,7 @@
 package dbtLab3;
 
+import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -14,6 +16,9 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
+import javax.swing.border.Border;
+import javax.swing.border.LineBorder;
+import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
@@ -34,6 +39,10 @@ public class ProductionPane extends BasicPane implements Pane {
 
 	public ProductionPane(Database db) {
 		super(db);
+		Border border = new LineBorder(Color.black);
+		TitledBorder t = new TitledBorder(border, "Message Field");
+		messageLabel.setBorder(t);
+		add(messageLabel, BorderLayout.SOUTH);
 		// TODO Auto-generated constructor stub
 	}
 
@@ -50,6 +59,9 @@ public class ProductionPane extends BasicPane implements Pane {
 		JScrollPane p1 = new JScrollPane(cookieNames);
 
 		JPanel p = new JPanel();
+		Border border = new LineBorder(Color.black);
+		TitledBorder t = new TitledBorder(border, "Cookies");
+		p.setBorder(t);
 		p.setLayout(new GridLayout(1, 2));
 		p.add(p1);
 		return p;
@@ -68,12 +80,15 @@ public class ProductionPane extends BasicPane implements Pane {
 		numberOfBags.add(cookieData);
 
 		numberOfBags.setVisible(true);
+		Border border = new LineBorder(Color.black);
+		TitledBorder t = new TitledBorder(border, "Production Controller");
+		numberOfBags.setBorder(t);
 		return numberOfBags;
 	}
 
 	public JComponent createBottomPanel() {
 		JButton[] buttons = new JButton[1];
-		buttons[0] = new JButton("Build Pallets");
+		buttons[0] = new JButton("Initiate Production");
 		return new BuildPallet(buttons, new ActionHandler());
 	}
 
@@ -91,20 +106,11 @@ public class ProductionPane extends BasicPane implements Pane {
 		}
 
 		JPanel leftoverData = new LeftOverdata(text, leftovers);
-
+		Border border = new LineBorder(Color.black);
+		TitledBorder t = new TitledBorder(border, "Leftovers");
+		leftoverData.setBorder(t);
 		return leftoverData;
 
-	}
-
-	public JComponent createLowBottomPanel() {
-		JButton[] buttons = new JButton[1];
-		buttons[0] = new JButton(
-				"Move to storage and read the barcode of each completed pallet");
-		return new PutPalletInDeepFreeze(buttons, new ActionFreeze());
-	}
-
-	public JComponent createMiddleBottomPanel() {
-		return messageLabel;
 	}
 
 	// fetches all cookieNames
@@ -156,7 +162,6 @@ public class ProductionPane extends BasicPane implements Pane {
 
 			String cookieName = (String) cookieNames.getSelectedValue();
 			String cookies = (String) fields.getText();
-			System.out.println(cookies);
 			ArrayList<Integer> nbrs = db.buildPallet(cookieName, cookies);
 			if (nbrs != null) {
 				if(nbrs.get(3) == 0){
@@ -169,24 +174,6 @@ public class ProductionPane extends BasicPane implements Pane {
 			} else {
 				displayMessage("Please define a proper cookie amount.");
 			}
-		}
-	}
-
-	class ActionFreeze implements ActionListener {
-
-		public void actionPerformed(ActionEvent e) {
-			String cookieName = (String) cookieNames.getSelectedValue();
-			if (cookieNames.isSelectionEmpty()) {
-				displayMessage("Please choose a cookie before proceeding");
-				return;
-			}
-			if (LeftOversLeft == null) {
-				displayMessage("Please define a proper amount of cookies");
-				return;
-			}
-			db.updateRaws(cookieName);
-			db.readPalletCode();
-			displayMessage("You successfully produced a few pallets. They now reside in deep freeze storage.");
 		}
 	}
 

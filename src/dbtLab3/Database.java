@@ -100,6 +100,21 @@ public class Database {
 		}
 		return cookies;
 	}
+	
+	public ArrayList<String> allProductionPallets() {
+		String sql = "select * from Pallet where dateOfProduction is null";
+		ArrayList<String> pallets = new ArrayList<String>();
+		try {
+			PreparedStatement ps = conn.prepareStatement(sql);
+			ResultSet rs = ps.executeQuery();
+			while (rs.next()) {
+				pallets.add(rs.getString("PalletNbr"));
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return pallets;
+	}
 
 	/** 
 	 *  Calculate how an amount of cookies should be distributed
@@ -141,7 +156,6 @@ public class Database {
 	 */
 	public ArrayList<Integer> buildPallet(String cookieName, String cookies) {
 		int nbrCookies = 0;
-		//den här try blocket borde göras om, för att programmet borde inte stänga av sig.
 		try{
 			nbrCookies = Integer.parseInt(cookies);
 		}catch(NumberFormatException nuff){
@@ -170,9 +184,7 @@ public class Database {
 	 *  their barcode read at the deep freeze storage.
 	 *  
 	 */
-	public void readPalletCode() {
-		int palletNbr = getLastBuiltPallet();
-		while (palletsToRegister > 0) {
+	public void readPalletCode(int palletNbr) {
 			String timeStamp = getCurrentTimeStamp();
 			String sql = "update Pallet set currentLocation = 'DeepFreeze' where palletNbr = ?";
 			String sql2 = "update Pallet set dateOfProduction = ? where palletNbr = ?";
@@ -190,10 +202,7 @@ public class Database {
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
-			palletNbr--;
-			palletsToRegister--;
 		}
-	}
 	
 	/** 
 	 *  Get the current time stamp from the running computer
@@ -455,13 +464,12 @@ public class Database {
 			}
 			
 		} catch (Exception e) {
-			e.printStackTrace();
 			throw new Exception("No Pallet Selected");
 		}
 		return temp;
 	}
 	
-	public void blockPallet(String input){
+	public void blockPallet(String input) throws Exception{
 		String sql = "select * from Pallet where palletNbr = ?";
 		try{
 		PreparedStatement ps = conn.prepareStatement(sql);
@@ -476,7 +484,7 @@ public class Database {
 		} else {ps.setBoolean(1, true);}
 		ps.executeUpdate();}
 		catch(Exception e){
-			e.printStackTrace();
+		throw new Exception("No Pallet Selected");
 		}
 	}
 	

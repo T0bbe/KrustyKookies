@@ -33,8 +33,8 @@ public class BasicPane extends JPanel {
      */
     public BasicPane(Database db) {
         this.db = db;
+        
         messageLabel = new JLabel("      ");
-                
         setLayout(new BorderLayout());
         
         JComponent leftPanel = createLeftPanel();
@@ -50,16 +50,12 @@ public class BasicPane extends JPanel {
         JComponent topPanel = createTopPanel();
         JComponent middlePanel = createMiddlePanel();
         JComponent bottomPanel = createBottomPanel();
-        JComponent lowBottomPanel = createLowBottomPanel();
-        JComponent middleBottomPanel = createMiddleBottomPanel();
         bottomPanel.setBorder
             (new CompoundBorder(new SoftBevelBorder(BevelBorder.RAISED),
                                 bottomPanel.getBorder()));
         rightPanel.add(topPanel, BorderLayout.NORTH);
         rightPanel.add(middlePanel, BorderLayout.CENTER);
         buttons.add(bottomPanel, BorderLayout.NORTH);
-        buttons.add(middleBottomPanel, BorderLayout.CENTER);
-        buttons.add(lowBottomPanel, BorderLayout.SOUTH);
         rightPanel.add(buttons, BorderLayout.SOUTH);
         add(rightPanel, BorderLayout.CENTER);
     }
@@ -99,14 +95,7 @@ public class BasicPane extends JPanel {
     public JComponent createBottomPanel() { 
         return new JPanel();
     }
-    
-    public JComponent createLowBottomPanel(){
-    	return new JPanel();
-    }
-    
-    public JComponent createMiddleBottomPanel(){
-    	return new JPanel();
-    }
+   
         
     /**
      * Perform the entry actions of the pane. Empty here, should be

@@ -35,13 +35,16 @@ public class KrustyGUI {
 		tabbedPane = new JTabbedPane();
 		
 		WelcomePane welcomePane = new WelcomePane(db);
-		tabbedPane.addTab("Welcome!", null, welcomePane, "Welcome!");
+		tabbedPane.addTab("Welcome", null, welcomePane, "Welcome!");
 		
 		ProductionPane productionPane = new ProductionPane(db);
-		tabbedPane.addTab("Production", null, productionPane, "Choose a cookie");
+		tabbedPane.addTab("Production Control", null, productionPane, "Choose a cookie");
+		
+		FreezerPane freezerPane = new FreezerPane(db);
+		tabbedPane.addTab("Storage Handler", null, freezerPane, "Handle Transport to Freezers");
 		
 		SearchPalletPane searchPalletPane = new SearchPalletPane(db);
-		tabbedPane.addTab("Pallet search", null, searchPalletPane, "Search for a pallet");
+		tabbedPane.addTab("Search", null, searchPalletPane, "Search for a pallet");
 		
 		tabbedPane.setSelectedIndex(0);
 		
