@@ -240,8 +240,13 @@ private void fetchPalletNr() {
 	}
 	batchNrListModel.removeAllElements();
 	try{
+	Integer.valueOf(batchNrField.getText());
     batchNrListModel.addElement(db.getPallet(batchNrField.getText()));
-	} catch (Exception e){
+	} catch (NumberFormatException e){
+		messageLabel.setText("Input is not a number");
+	}
+	
+	catch (Exception e){
 		messageLabel.setText(e.getMessage());
 	}
 	}
@@ -281,6 +286,7 @@ private void fetchBatch() {
 	}
 	} catch (Exception e){
 		messageLabel.setText(e.getMessage());
+		return;
 	}
 	batchNrListModel.removeAllElements();
 	ArrayList<String> output = db.getBatch(searchCriterias);

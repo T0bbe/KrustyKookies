@@ -15,19 +15,25 @@ public boolean checkDate(JTextField input) throws Exception{
 	}
 	
 	if(date.length() != 10){
-		throw new Exception("Wrong Format YYYY-MM-DD");
+		exceptionThrower();
+		return false;
 	}
 		try{
 		Integer.parseInt(date.substring(0,4));
 		Integer.parseInt(date.substring(5,7));
 		Integer.parseInt(date.substring(8,10));
 		} catch (NumberFormatException e){
-		throw new Exception("Wrong Format YYYY-MM-DD");
+		exceptionThrower();
 		}
 		if(date.charAt(4) == '-' && date.charAt(7) == '-'){
 			return true;
 	}
-		throw new Exception("Wrong Format YYYY-MM-DD");
+		exceptionThrower();
+		return false;
 	
+}
+
+private void exceptionThrower() throws Exception{
+	throw new Exception("Wrong Date Format (YYYY-MM-DD)");
 }
 }
