@@ -214,18 +214,19 @@ public class SearchPalletPane extends JPanel implements Pane{
 		Border border = new LineBorder(Color.black);
 		TitledBorder t = new TitledBorder(border, "Information");
 		p.setBorder(t);
-		fields = new JTextField[10];
+		fields = new JTextField[12];
 		fields[0] = new KrustyTextField("Pallet Number");
 		fields[2] = new KrustyTextField("Cookie Name");
 		fields[4] = new KrustyTextField("Production Date");
-		fields[6] = new KrustyTextField("Current Location");
-		fields[8] = new KrustyTextField("Blocked");
-		p.setLayout(new GridLayout(10, 1));
-		for(int i = 1; i < 10; i = i+2){
+		fields[6] = new KrustyTextField("Production Time");
+		fields[8] = new KrustyTextField("Current Location");
+		fields[10] = new KrustyTextField("Blocked");
+		p.setLayout(new GridLayout(12, 1));
+		for(int i = 1; i < 12; i = i+2){
 			fields[i] = new JTextField("                                         ");
 			fields[i].setEditable(false);
 		}
-		for(int i = 0; i < 10; i++){
+		for(int i = 0; i < 12; i++){
 			p.add(fields[i]);
 		}
 		
@@ -293,7 +294,6 @@ private void fetchBatch() {
 	for(int j = 0; j < output.size(); j++){
     batchNrListModel.addElement(Integer.valueOf((output.get(j))));
 	}
-	/*lActHand.valueChanged(null);*/
 	}
 	}
 
@@ -307,7 +307,7 @@ private void fetchInformation(String input) {
     	messageLabel.setText(e.getMessage());
     	return;
 	}
-    for(int i = 3; i < 10; i = i+2){
+    for(int i = 3; i < 12; i = i+2){
     fields[i].setText((batchNbrs.get((i-1)/2)));
     }
     

@@ -186,9 +186,10 @@ public class Database {
 	 */
 	public void readPalletCode(int palletNbr) {
 			String timeStamp = getCurrentTimeStamp();
+			System.out.print(timeStamp);
 			String sql = "update Pallet set currentLocation = 'DeepFreeze' where palletNbr = ?";
 			String sql2 = "update Pallet set dateOfProduction = ? where palletNbr = ?";
-			String sql3 = "update Pallet set dateOfProduction = ? where palletNbr = ?";
+			String sql3 = "update Pallet set timeOfProduction = ? where palletNbr = ?";
 			try {
 				PreparedStatement loc = conn.prepareStatement(sql);
 				loc.setInt(1, palletNbr);
@@ -196,9 +197,11 @@ public class Database {
 				date.setString(1, new String(timeStamp.subSequence(0,4) + "-" + timeStamp.subSequence(4, 6) + "-" + timeStamp.subSequence(6, 8)));
 				date.setInt(2, palletNbr);
 				PreparedStatement time = conn.prepareStatement(sql3);
-				time.setString(1, new String(timeStamp.substring(11, 13)) + "." + timeStamp.substring(13,15));
+				time.setString(1, new String(timeStamp.subSequence(9, 11) + ":" + timeStamp.subSequence(11,13) + ":" + timeStamp.subSequence(13,15)));
+				time.setInt(2, palletNbr);
 				loc.executeUpdate();
 				date.executeUpdate();
+				time.executeUpdate();
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
@@ -246,7 +249,7 @@ public class Database {
 		return temp;
 	}
 
-	public ArrayList<String> showPallet(Integer palletNbr) {
+/*	public ArrayList<String> showPallet(Integer palletNbr) {
 		String sql = "select * from Pallets where palletNbr = ?";
 		ArrayList<String> temp = new ArrayList<String>();
 		try {
@@ -256,6 +259,7 @@ public class Database {
 			temp.add(palletNbr.toString());
 			temp.add(rs.getString("cookieName"));
 			temp.add(rs.getString("dateOfProduction"));
+			temp.add(rs.getString("timeOfProduction"));
 			temp.add(rs.getString("currentLocation"));
 			if (rs.getBoolean("isBlocked")) {
 				temp.add("Yes");
@@ -268,7 +272,7 @@ public class Database {
 		}
 		return temp;
 	}
-	
+	*/
 	
 	/** 
 	 *  Calculates and updates the new amount value for
@@ -456,6 +460,7 @@ public class Database {
 			temp.add(palletNbr);
 			temp.add(rs.getString("cookieName"));
 			temp.add(rs.getString("dateOfProduction"));
+			temp.add(rs.getString("timeOfProduction"));
 			temp.add(rs.getString("currentLocation"));
 			if(rs.getBoolean("isBlocked")){
 			temp.add("Yes");
