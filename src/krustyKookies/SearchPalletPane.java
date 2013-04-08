@@ -308,9 +308,9 @@ public class SearchPalletPane extends JPanel implements Pane{
 				return;
 			}
 			batchNrListModel.removeAllElements();
-			ArrayList<String> output = db.getBatch(searchCriterias);
+			ArrayList<Integer> output = db.getBatch(searchCriterias);
 			for(int j = 0; j < output.size(); j++){
-				batchNrListModel.addElement(Integer.valueOf((output.get(j))));
+				batchNrListModel.addElement((output.get(j)));
 			}
 		}
 	}

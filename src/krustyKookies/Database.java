@@ -172,14 +172,13 @@ public class Database {
 	
 	
 	/** 
-	 *  Updates built pallets which has yet not have
-	 *  their barcode read at the deep freeze storage.
+	 * Assigns a timestamp to the pallet and sets the currentLocation to Deep Freeze Storage.
 	 *  
+	 *  @param int palletNbr, the identifying number for the pallet.
 	 */
 	public void readPalletCode(int palletNbr) {
 			String timeStamp = getCurrentTimeStamp();
-			System.out.print(timeStamp);
-			String sql = "update Pallet set currentLocation = 'DeepFreeze' where palletNbr = ?";
+			String sql = "update Pallet set currentLocation = 'DeepFreezeStorage' where palletNbr = ?";
 			String sql2 = "update Pallet set dateOfProduction = ? where palletNbr = ?";
 			String sql3 = "update Pallet set timeOfProduction = ? where palletNbr = ?";
 			try {
@@ -225,22 +224,6 @@ public class Database {
 		}
 		return temp;
 	}
-
-	public ArrayList<String> getBatch(String date) {
-		String sql = "select * from Pallets where date = ?";
-		ArrayList<String> temp = new ArrayList<String>();
-		try {
-			PreparedStatement ps = conn.prepareStatement(sql);
-			ps.setString(1, date);
-			ResultSet rs = ps.executeQuery();
-			temp.add(((Integer) rs.getInt("PalletNbr")).toString());
-
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		return temp;
-	}
-
 	
 	/** 
 	 *  Calculates and updates the new amount value for
@@ -341,6 +324,12 @@ public class Database {
 		return materials;
 	}
 	
+	/** 
+	 * Checks is a certain pallet number has been produced.
+	 *  
+	 *  @param String palletNbr
+	 *  @return Integer palletNbr, if it exist within the database
+	 */
 	public Integer getPallet(String palletNbr) throws Exception {
 		String sql = "select * from Pallet where palletNbr = ?";
 		int temp = 0;
@@ -357,7 +346,13 @@ public class Database {
 		return temp;
 	}
 	
-	public ArrayList<String> getBatch(String[] input) {
+	/** 
+	 * Checks which pallets in the database that fulfill the chosen search criterias.
+	 *  
+	 *  @param String[] input, contains cookieName, block status and production date interval.
+	 *  @return An arrayList containing all the pallet numbers matching the search criterias.
+	 */
+	public ArrayList<Integer> getBatch(String[] input) {
 		PreparedStatement ps;
 		String sql;
 		if(input[0] == "All"){
@@ -386,24 +381,24 @@ public class Database {
 			ps.setString(3, input[2]);
 		}
 		
-		ArrayList<String> result = new ArrayList<String>();
+		ArrayList<Integer> result = new ArrayList<Integer>();
 		ResultSet rs = ps.executeQuery();
 		
 		if(input[3] == "Yes"){
 		while(rs.next()){
 		if(rs.getBoolean("isBlocked") == true){
-		result.add(((Integer) rs.getInt("PalletNbr")).toString());}
+		result.add((rs.getInt("PalletNbr")));}
 		}
 		return result;
 		}   else if(input[3] == "No"){
 			while(rs.next()){
 			if(rs.getBoolean("isBlocked") == false){
-			result.add(((Integer) rs.getInt("PalletNbr")).toString());}
+			result.add((rs.getInt("PalletNbr")));}
 			}
 			return result;
 			} else {
 				while(rs.next()){
-					result.add(((Integer) rs.getInt("PalletNbr")).toString());}
+					result.add((rs.getInt("PalletNbr")));}
 			}
 					return result;
 		}catch (SQLException e) {
@@ -412,6 +407,12 @@ public class Database {
 		return null;
 	}
 	
+	/** 
+	 * Retrieves information about a certain pallet.
+	 *  
+	 *  @param String palletNbr
+	 *  @return An arrayList containing name, date/time of production, current location and the blocking status of the pallet
+	 */
 	public ArrayList<String> showPallet(String palletNbr) throws Exception{
 		String sql = "select * from Pallet where palletNbr = ?";
 		ArrayList<String> temp = new ArrayList<String>();
@@ -437,15 +438,20 @@ public class Database {
 		return temp;
 	}
 	
-	public void blockPallet(String input) throws Exception{
+	/** 
+	 * Changes the blocking status of a specific pallet.
+	 *  
+	 *  @param String palletNbr
+	 */
+	public void blockPallet(String palletNbr) throws Exception{
 		String sql = "select * from Pallet where palletNbr = ?";
 		try{
 		PreparedStatement ps = conn.prepareStatement(sql);
-		ps.setInt(1, Integer.valueOf(input));
+		ps.setInt(1, Integer.valueOf(palletNbr));
 		ResultSet rs = ps.executeQuery();
 		sql = "update Pallet set isBlocked = ? where palletNbr = ?";
 		ps = conn.prepareStatement(sql);
-		ps.setInt(2, Integer.valueOf(input));
+		ps.setInt(2, Integer.valueOf(palletNbr));
 		rs.next();
 		if(rs.getBoolean("isBlocked")){
 			ps.setBoolean(1, false);
