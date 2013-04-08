@@ -80,6 +80,8 @@ public class SearchPalletPane extends JPanel implements Pane{
 	
 	private JRadioButtonMenuItem[] cookieButtons;
 	
+	private JRadioButtonMenuItem[] blockButtons;
+	
 	private JTextField startDateField;
 	
 	private JTextField endDateField;
@@ -88,7 +90,11 @@ public class SearchPalletPane extends JPanel implements Pane{
 	
 	private JMenu menu;
 	
-	private ButtonGroup buttonGroup;
+	private JMenu menu2;
+	
+	private ButtonGroup cookieButtonGroup;
+	
+	private ButtonGroup blockButtonGroup;
 	
 	private ListActionHandler lActHand;
 	
@@ -131,31 +137,44 @@ public class SearchPalletPane extends JPanel implements Pane{
 	public JComponent createLeftPanel() {
 		batchNrField = new JTextField(13);
 		menu = new JMenu("Select Cookie Name");
+		menu2 = new JMenu("Choose Block Status");
 		Font newTextFieldFont = new Font(batchNrField.getFont().getName(),Font.BOLD,batchNrField.getFont().getSize());
 		Font newTextFieldFont2 = new Font(batchNrField.getFont().getName(),Font.PLAIN,batchNrField.getFont().getSize());
 		searchButton1 = new JButton("Perform Search");
 		searchButton2 = new JButton("Perform Search");
-		JMenuBar menuField = new JMenuBar();
+		JMenuBar cookieMenuField = new JMenuBar();
 		menu.setFont(newTextFieldFont2);
+		JMenuBar blockMenuField = new JMenuBar();
+		menu2.setFont(newTextFieldFont2);
 		all = new JRadioButtonMenuItem("All");
 		all.setSelected(true);
 		menu.add(all);
 		
 		ArrayList<String> cButtons = getCookies();
 		cookieButtons = new JRadioButtonMenuItem[8];
+		blockButtons = new JRadioButtonMenuItem[3];
 		cookieButtons[0] = all;
 		for(int i=1; i <= cButtons.size(); i++){
 			cookieButtons[i] = new JRadioButtonMenuItem(cButtons.get(i-1));
 			menu.add(cookieButtons[i]);
 		}
-		groupButtons(cookieButtons);
-		menuField.add(menu);
+		blockButtons[0] = new JRadioButtonMenuItem("Both");
+		blockButtons[0].setSelected(true);
+		menu2.add(blockButtons[0]);
+		blockButtons[1] = new JRadioButtonMenuItem("Yes");
+		menu2.add(blockButtons[1]);
+		blockButtons[2] = new JRadioButtonMenuItem("No");
+		menu2.add(blockButtons[2]);
+		groupBlockButtons(blockButtons);
+		groupCookieButtons(cookieButtons);
+		cookieMenuField.add(menu);
+		blockMenuField.add(menu2);
 		
 		
 		BatchNrSearchActionHandler batchActHand = new BatchNrSearchActionHandler(searchButton1);
 		DateSearchButtonActionHandler dateActHand = new DateSearchButtonActionHandler(searchButton2);
 		JPanel p = new JPanel();
-		p.setLayout(new GridLayout(12, 1));
+		p.setLayout(new GridLayout(15, 1));
 		Border border = new LineBorder(Color.black);
 		TitledBorder t = new TitledBorder(border, "Search");
 		t.setTitleColor(Color.black);
@@ -169,7 +188,10 @@ public class SearchPalletPane extends JPanel implements Pane{
 		p.add(searchButton1);
 		p.add(new JPanel());
 		p.add(searchInfo2);
-		p.add(menuField);
+		p.add(cookieMenuField);
+		p.add(new JPanel());
+		p.add(blockMenuField);
+		p.add(new JPanel());
 		p.add(new KrustyTextField("Start Date (Optional)"));
 		p.add(startDateField);
 		p.add(new KrustyTextField("End Date (Optional)"));
@@ -265,14 +287,26 @@ private void blockPallet(String input) {
 
 private void fetchBatch() {
 	clearErrorField();
-	String[] searchCriterias = new String[3];
+	String[] searchCriterias = new String[4];
 	boolean finished = false;
 	int i = 0;
-	Enumeration<AbstractButton> st = buttonGroup.getElements();
-	while(i < buttonGroup.getButtonCount() && !finished){
-		AbstractButton button = st.nextElement();
+	AbstractButton button;
+	Enumeration<AbstractButton> st = cookieButtonGroup.getElements();
+	while(i < cookieButtonGroup.getButtonCount() && !finished){
+		button = st.nextElement();
 		if(button.isSelected()){
 			searchCriterias[0] = button.getText();
+			finished = true;
+		} 
+		i++;	
+	}
+	i = 0;
+	finished = false;
+	st = blockButtonGroup.getElements();
+	while(i < blockButtonGroup.getButtonCount() && !finished){
+		button = st.nextElement();
+		if(button.isSelected()){
+			searchCriterias[3] = button.getText();
 			finished = true;
 		} 
 		i++;	
@@ -390,10 +424,17 @@ public void entryActions() {
 	
 }
 
-public void groupButtons(JRadioButtonMenuItem[] buttons) {
-buttonGroup = new ButtonGroup();
+public void groupCookieButtons(JRadioButtonMenuItem[] buttons) {
+cookieButtonGroup = new ButtonGroup();
 for(int i = 0; i < buttons.length; i++){
-	buttonGroup.add(buttons[i]);
+	cookieButtonGroup.add(buttons[i]);
+}
+}
+
+public void groupBlockButtons(JRadioButtonMenuItem[] buttons) {
+blockButtonGroup = new ButtonGroup();
+for(int i = 0; i < buttons.length; i++){
+	blockButtonGroup.add(buttons[i]);
 }
 }
 }

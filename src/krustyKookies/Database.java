@@ -440,13 +440,28 @@ public class Database {
 		
 		ArrayList<String> result = new ArrayList<String>();
 		ResultSet rs = ps.executeQuery();
+		
+		if(input[3] == "Yes"){
 		while(rs.next()){
+		if(rs.getBoolean("isBlocked") == true){
 		result.add(((Integer) rs.getInt("PalletNbr")).toString());}
-		return result;
-		} catch (SQLException e) {
-			e.printStackTrace();
-			return null;
 		}
+		return result;
+		}   else if(input[3] == "No"){
+			while(rs.next()){
+			if(rs.getBoolean("isBlocked") == false){
+			result.add(((Integer) rs.getInt("PalletNbr")).toString());}
+			}
+			return result;
+			} else {
+				while(rs.next()){
+					result.add(((Integer) rs.getInt("PalletNbr")).toString());}
+			}
+					return result;
+		}catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 	
 	public ArrayList<String> showPallet(String palletNbr) throws Exception{
