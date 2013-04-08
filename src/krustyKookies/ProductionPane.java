@@ -6,7 +6,6 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
-
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
@@ -19,13 +18,9 @@ import javax.swing.ListSelectionModel;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 
 public class ProductionPane extends BasicPane implements Pane {
 	private static final long serialVersionUID = 1;
-
-	private ArrayList<Integer> LeftOversLeft = null;
 
 	private DefaultListModel cookieNameListModel;
 
@@ -35,15 +30,12 @@ public class ProductionPane extends BasicPane implements Pane {
 
 	private JList cookieNames;
 
-	private JPanel numberOfBags;
-
 	public ProductionPane(Database db) {
 		super(db);
 		Border border = new LineBorder(Color.black);
 		TitledBorder t = new TitledBorder(border, "Message Field");
 		messageLabel.setBorder(t);
 		add(messageLabel, BorderLayout.SOUTH);
-		// TODO Auto-generated constructor stub
 	}
 
 	// Creates left panel with a cookieName list
@@ -54,7 +46,6 @@ public class ProductionPane extends BasicPane implements Pane {
 
 		cookieNames.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		cookieNames.setPrototypeCellValue("123456789012");
-		cookieNames.addListSelectionListener(new CookieNameSelectionListener());
 
 		JScrollPane p1 = new JScrollPane(cookieNames);
 
@@ -136,22 +127,8 @@ public class ProductionPane extends BasicPane implements Pane {
 		leftovers[2].setText(boxes);
 		leftovers[1].setText(bags);
 		leftovers[0].setText(cookies);
-		LeftOversLeft = lefts;
 	}
 
-	class CookieNameSelectionListener implements ListSelectionListener {
-		/**
-		 * Called when the user selects a cookieName in the list. makes the
-		 * numberOfBags panel visible
-		 */
-		public void valueChanged(ListSelectionEvent e) {
-			if (cookieNames.isSelectionEmpty()) {
-				return;
-			}
-			String cookieName = (String) cookieNames.getSelectedValue();
-		}
-	}
-	
 	class ActionHandler implements ActionListener {
 
 		public void actionPerformed(ActionEvent e) {

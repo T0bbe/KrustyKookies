@@ -38,13 +38,13 @@ public class KrustyGUI {
 		tabbedPane.addTab("Welcome", null, welcomePane, "Welcome!");
 		
 		ProductionPane productionPane = new ProductionPane(db);
-		tabbedPane.addTab("Production Control", null, productionPane, "Choose a cookie");
+		tabbedPane.addTab("Production Control", null, productionPane, "Produce cookies");
 		
 		FreezerPane freezerPane = new FreezerPane(db);
-		tabbedPane.addTab("Storage Handler", null, freezerPane, "Handle Transport to Freezers");
+		tabbedPane.addTab("Storage Handler", null, freezerPane, "Handle transport to freezers");
 		
 		SearchPalletPane searchPalletPane = new SearchPalletPane(db);
-		tabbedPane.addTab("Search", null, searchPalletPane, "Search for a pallet");
+		tabbedPane.addTab("Search / Block", null, searchPalletPane, "Search for a pallet / Block a pallets");
 		
 		tabbedPane.setSelectedIndex(0);
 		

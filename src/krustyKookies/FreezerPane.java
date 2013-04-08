@@ -6,8 +6,6 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
-
-import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -25,15 +23,11 @@ import javax.swing.event.ListSelectionListener;
 public class FreezerPane extends BasicPane implements Pane {
 	private static final long serialVersionUID = 1;
 
-	private ArrayList<Integer> LeftOversLeft = null;
-
 	private DefaultListModel<Integer> palletNbrsListModel;
 
 	private JTextField[] fields;
 
 	private JList palletNbrs;
-
-	private JPanel numberOfBags;
 
 	public FreezerPane(Database db) {
 		super(db);
@@ -62,7 +56,7 @@ public class FreezerPane extends BasicPane implements Pane {
 		p.add(p1);
 		return p;
 	}
-	
+
 	public JComponent createTopPanel() {
 		JPanel p = new JPanel();
 		Border border = new LineBorder(Color.black);
@@ -71,7 +65,7 @@ public class FreezerPane extends BasicPane implements Pane {
 		fields = new JTextField[4];
 		fields[0] = new KrustyTextField("Pallet Number");
 		fields[2] = new KrustyTextField("Cookie Name");
-		
+
 		p.setLayout(new GridLayout(4, 1));
 		for(int i = 1; i < 4; i = i+2){
 			fields[i] = new JTextField("                                         ");
@@ -82,23 +76,23 @@ public class FreezerPane extends BasicPane implements Pane {
 		}
 		return p;
 	}
-	
+
 	private void fetchInformation(String input) {
 		ArrayList<String> batchNbrs;
 		try{
-	    batchNbrs = db.showPallet(input);
-	    fields[1].setText(input);
-	    fields[3].setText(batchNbrs.get(1));
+			batchNbrs = db.showPallet(input);
+			fields[1].setText(input);
+			fields[3].setText(batchNbrs.get(1));
 		} catch (Exception e){
-	    	return;
+			return;
 		}
 	}
-	
+
 	private void clearInformation(){
 		fields[1].setText("");
-	    fields[3].setText("");
+		fields[3].setText("");
 	}
-	
+
 
 	public JComponent createBottomPanel() {
 		JButton[] buttons = new JButton[1];
@@ -139,7 +133,7 @@ public class FreezerPane extends BasicPane implements Pane {
 	class ActionFreeze implements ActionListener {
 
 		public void actionPerformed(ActionEvent e) {
-			
+
 			if (palletNbrs.isSelectionEmpty()) {
 				displayMessage("Please choose a pallet before proceeding");
 				return;

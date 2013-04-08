@@ -11,17 +11,10 @@ import java.sql.*;
  */
 public class Database {
 	
-	private int palletsToRegister = 0;
-	
 	/**
 	 * The database connection.
 	 */
 	private Connection conn;
-
-	/**
-	 * An SQL statement object.
-	 */
-	private Statement stmt;
 
 	/**
 	 * Create the database interface object. Connection to the database is
@@ -163,7 +156,6 @@ public class Database {
 		}
 		ArrayList<Integer> nbrOfLeft = calc(nbrCookies);
 		int pallets = nbrOfLeft.get(3);
-		palletsToRegister = pallets;
 		while (pallets >= 1) {
 			String sql = "insert into Pallet(palletNbr, dateOfProduction, isBlocked, currentLocation, cookieName) values(null, null, false, 'InProduction', ?)";
 			try {
@@ -249,30 +241,6 @@ public class Database {
 		return temp;
 	}
 
-/*	public ArrayList<String> showPallet(Integer palletNbr) {
-		String sql = "select * from Pallets where palletNbr = ?";
-		ArrayList<String> temp = new ArrayList<String>();
-		try {
-			PreparedStatement ps = conn.prepareStatement(sql);
-			ps.setInt(1, palletNbr);
-			ResultSet rs = ps.executeQuery();
-			temp.add(palletNbr.toString());
-			temp.add(rs.getString("cookieName"));
-			temp.add(rs.getString("dateOfProduction"));
-			temp.add(rs.getString("timeOfProduction"));
-			temp.add(rs.getString("currentLocation"));
-			if (rs.getBoolean("isBlocked")) {
-				temp.add("Yes");
-			} else {
-				temp.add("No");
-			}
-
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		return temp;
-	}
-	*/
 	
 	/** 
 	 *  Calculates and updates the new amount value for
@@ -371,26 +339,6 @@ public class Database {
 			e.printStackTrace();
 		}
 		return materials;
-	}
-	
-	/** 
-	 *  Fetches the palletNbr of the last built pallet
-	 * 
-	 *  @return the palletNbr for the last built pallet
-	 */
-	private int getLastBuiltPallet(){
-		int palletNbr = 0;
-		String sql = "select palletNbr from Pallet order by palletNbr";
-		try{
-			PreparedStatement ps = conn.prepareStatement(sql);
-			ResultSet rs = ps.executeQuery();
-			rs.last();
-			return rs.getInt("palletNbr");
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		
-		return palletNbr;
 	}
 	
 	public Integer getPallet(String palletNbr) throws Exception {
